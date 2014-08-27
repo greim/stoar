@@ -1,6 +1,7 @@
 # Stoar
 
-A flux data store providing dispatcher and event emitter capabilities.
+A [Flux](http://facebook.github.io/react/docs/flux-overview.html) data store providing dispatcher and event emitter capabilities.
+This is not a complete Flux implementation, just the data store part.
 
 ```sh
 % npm install stoar
@@ -71,17 +72,3 @@ var emitter = store.emitter({
 ```
 
 Now anyone can be notified when the count increases to five or more.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
