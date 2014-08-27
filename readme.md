@@ -11,6 +11,30 @@ This is not a complete Flux implementation, just the data store part.
 var Stoar = require('stoar');
 ```
 
+It's easy to make a Stoar.
+
+```js
+var store = new Stoar({
+  data: { count: 0 }
+});
+```
+
+A Stoar can also contain an init method that runs at construction time, and whatever data you want to put in there.
+
+```js
+var store = new Stoar({
+  init: function(){
+    console.log(this.get('name'));
+    // log: "untitled"
+  },
+  data: {
+    count: 0,
+    isFresh: true,
+    name: 'untitled'
+  }
+});
+```
+
 In its simplest incarnation a Stoar instance simply passes through change events.
 
 ```js
@@ -30,26 +54,13 @@ dispatcher.command('change:count', 2);
 // log: 2
 ```
 
-A Stoar instance can contain an init method that runs at construction time, and whatever data you want to put in it.
-
-```js
-var store = new Stoar({
-  init: function(){
-    console.log(this.get('name'));
-    // log: "untitled"
-  },
-  data: {
-    count: 0,
-    isFresh: true,
-    name: 'untitled'
-  }
-});
-```
+For each x in your store data, you can `dispatcher.command('change:x', newValue)` and also `emitter.on('change:x', handler)`.
+Not very interesting by itself.
+The power comes when you customize your dispatchers and emitters.
 
 ## Dispatchers
 
-For each x in data, you can `dispatcher.command('change:x', newValue)` and also `emitter.on('change:x', handler)`.
-However, dispatchers get more interesting when you add custom commands.
+You can add custom commands.
 
 ```js
 var dispatcher = store.dispatcher({
