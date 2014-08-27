@@ -303,5 +303,31 @@ describe('stoar', function(){
     store.set('foo', true);
     done();
   });
+
+  it('should handle bare change event', function(){
+    var res = '';
+    var store = new Stoar({data:{foo:null}});
+    var emitter = store.emitter({
+      'change': function(prop, val, old){
+        res += 'b';
+        assert.strictEqual(prop, 'foo');
+        assert.strictEqual(val, true);
+        assert.strictEqual(old, null);
+      }
+    });
+    emitter.on('change:foo', function(val, old){
+      res += 'a';
+      assert.strictEqual(val, true);
+      assert.strictEqual(old, null);
+    });
+    emitter.on('change', function(prop, val, old){
+      res += 'c';
+      assert.strictEqual(prop, 'foo');
+      assert.strictEqual(val, true);
+      assert.strictEqual(old, null);
+    });
+    store.set('foo', true);
+    assert.strictEqual(res, 'abc');
+  });
 });
 

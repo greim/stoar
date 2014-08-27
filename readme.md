@@ -116,6 +116,23 @@ var emitter = store.emitter({
 
 Now anyone listening to `countPassedThreshold` will be notified when the count increases to five or more.
 
+Emitters also have a generic `change`.
+
+```js
+var emitter = store.emitter({
+  change: function(name, val, old){
+    console.log('%s changed from %s to %s', name, val, old);
+  }
+});
+
+emitter.on('change', function(name, val, old){
+  // ...
+});
+
+dispatcher.command('change:count', 3);
+// log: count changed from 0 to 3
+```
+
 An emitter event can also return false to prevent listeners from being notified.
 
 ```js

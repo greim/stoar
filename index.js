@@ -90,15 +90,21 @@ function Emitter(store, args){
     this._ctx.init.call(this._ctx);
   }
   store._emitter.on('change', function(prop, val, old){
-    var changeEv = 'change:' + prop;
-    var func = self._ctx[changeEv];
-    var retVal;
-    if (typeof func === 'function'){
-      retVal = func.call(self._ctx, val, old);
-    }
-    if (retVal === undefined || retVal){
-      self.emit(changeEv, val, old);
-    }
+    _.each(['change:' + prop, 'change'], function(changeEv, idx){
+      var isJustChange = idx === 1;
+      var func = self._ctx[changeEv];
+      var retVal;
+      if (typeof func === 'function'){
+        retVal = isJustChange
+          ? func.call(self._ctx, prop, val, old)
+          : func.call(self._ctx, val, old)
+      }
+      if (retVal === undefined || retVal){
+        isJustChange
+          ? self.emit(changeEv, prop, val, old)
+          : self.emit(changeEv, val, old)
+      }
+    });
   });
 }
 
