@@ -73,8 +73,8 @@ var dispatcher = store.dispatcher({
 dispatcher.command('reset');
 ```
 
+Anyone who did `emitter.on('change:count')` or `emitter.on('change:isFresh')` would now be notified.
 Custom commands give you more control of how the store gets updated.
-Anyone doing `emitter.on('change:count')` or `emitter.on('change:isFresh')` would now be notified.
 You can also have an optional `init` method which runs once at the start.
 
 ```js
