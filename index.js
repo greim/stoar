@@ -21,10 +21,8 @@ _.extend(Store.prototype, {
   set: function(prop, newVal){
     var oldVal = this._data[prop];
     var isDifferent = oldVal !== newVal;
-    if (isDifferent){
-      this._data[prop] = newVal;
-      this._emitter.emit('change', prop, newVal, oldVal);
-    }
+    this._data[prop] = newVal;
+    this._emitter.emit('change', prop, newVal, oldVal);
   },
 
   get: function(prop){
