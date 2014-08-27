@@ -81,6 +81,24 @@ dispatcher.command('fetch');
 Anyone listening to `change:loading` or `change:items` would be notified in the appropriate order.
 Custom commands give you more control of how the store gets updated.
 
+A dispatcher custom command may be of the same name as a default command.
+If so, returning false from the method prevents the default action.
+
+```js
+var store = new Stoar({
+  data: { count: 0 }
+});
+var dispatcher = store.dispatcher({
+  'change:count': function(count){
+    if (isNaN(count - 0)){
+      return false;
+    }
+  }
+});
+dispatcher.command('change:count', 'not a number');
+// no effect
+```
+
 ## Emitters
 
 An emitter is an instance of a node.js EventEmitter, but with extra capabilities.
@@ -97,6 +115,18 @@ var emitter = store.emitter({
 ```
 
 Now anyone listening to `countPassedThreshold` will be notified when the count increases to five or more.
+
+An emitter event can also return false to prevent listeners from being notified.
+
+```js
+var emitter = store.emitter({
+  'change:count': function(newCount, oldCount){
+    if (newCount === oldCount){
+      return false;
+    }
+  }
+});
+```
 
 ## Init methods
 
