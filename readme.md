@@ -98,7 +98,7 @@ var emitter = store.emitter({
 });
 ```
 
-Now anyone can be notified when the count increases to five or more.
+Now anyone who did `emitter.on('countPassedThreshold', handler)` will be notified when the count increases to five or more.
 You can also have an optional `init` method which runs once at the start.
 
 ```js
