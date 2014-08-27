@@ -102,7 +102,7 @@ dispatcher.command('change:count', 'not a number');
 ## Emitters
 
 An emitter is an instance of a node.js EventEmitter, but with extra capabilities.
-Like dispatchers, emitters get more interesting when you add custom events.
+Like dispatchers, emitters get more interesting when you emit custom events.
 
 ```js
 var emitter = store.emitter({
