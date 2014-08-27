@@ -309,25 +309,38 @@ describe('stoar', function(){
     var store = new Stoar({data:{foo:null}});
     var emitter = store.emitter({
       'change': function(prop, val, old){
-        res += 'b';
+        res += 'a';
         assert.strictEqual(prop, 'foo');
         assert.strictEqual(val, true);
         assert.strictEqual(old, null);
       }
     });
-    emitter.on('change:foo', function(val, old){
-      res += 'a';
+    emitter.on('change', function(prop, val, old){
+      res += 'b';
+      assert.strictEqual(prop, 'foo');
       assert.strictEqual(val, true);
       assert.strictEqual(old, null);
     });
-    emitter.on('change', function(prop, val, old){
+    emitter.on('change:foo', function(val, old){
       res += 'c';
-      assert.strictEqual(prop, 'foo');
       assert.strictEqual(val, true);
       assert.strictEqual(old, null);
     });
     store.set('foo', true);
     assert.strictEqual(res, 'abc');
+  });
+
+  it('returning false from change should prevent change:foo', function(){
+    var store = new Stoar({data:{foo:null}});
+    var emitter = store.emitter({
+      'change': function(){
+        return false;
+      }
+    });
+    emitter.on('change:foo', function(val, old){
+      throw new Error('did not prevent');
+    });
+    store.set('foo', true);
   });
 });
 

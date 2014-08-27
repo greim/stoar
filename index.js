@@ -90,8 +90,10 @@ function Emitter(store, args){
     this._ctx.init.call(this._ctx);
   }
   store._emitter.on('change', function(prop, val, old){
-    _.each(['change:' + prop, 'change'], function(changeEv, idx){
-      var isJustChange = idx === 1;
+    var events = ['change','change:' + prop];
+    for (var i=0; i<events.length; i++){
+      var changeEv = events[i];
+      var isJustChange = changeEv === 'change';
       var func = self._ctx[changeEv];
       var retVal;
       if (typeof func === 'function'){
@@ -103,8 +105,10 @@ function Emitter(store, args){
         isJustChange
           ? self.emit(changeEv, prop, val, old)
           : self.emit(changeEv, val, old)
+      } else {
+        break;
       }
-    });
+    }
   });
 }
 

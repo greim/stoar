@@ -4,6 +4,7 @@ Note: this library is still experimental.
 
 A [Flux](http://facebook.github.io/react/docs/flux-overview.html) data store providing dispatcher and event emitter capabilities.
 This is not a complete Flux implementation, just the store and dispatcher part.
+This lib makes very few assumptions or opinions about your overall Flux app structure.
 
 ```sh
 % npm install stoar
