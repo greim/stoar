@@ -1,7 +1,7 @@
 # Stoar
 
 A [Flux](http://facebook.github.io/react/docs/flux-overview.html) data store providing dispatcher and event emitter capabilities.
-This is not a complete Flux implementation, just the data store part.
+This is not a complete Flux implementation, just the store and dispatcher part.
 
 ```sh
 % npm install stoar
