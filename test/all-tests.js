@@ -194,6 +194,25 @@ describe('stoar', function(){
     done();
   });
 
+  it('dont block a default command if return truthy', function(done){
+    var val = '';
+    var store = new Stoar({data:{foo:null}});
+    var emitter = store.emitter();
+    var dispatcher = store.dispatcher({
+      'change:foo': function(){
+        val += 'a';
+        return true;
+      }
+    });
+    emitter.on('change:foo', function(num){
+      val += 'b';
+    });
+    dispatcher.command('change:foo', true);
+    assert.strictEqual(val, 'ab');
+    assert.strictEqual(store.get('foo'), true);
+    done();
+  });
+
   it('dispatcher init should have this.store', function(done){
     var store = new Stoar({data:{foo:null}});
     var dispatcher = store.dispatcher({
@@ -245,6 +264,44 @@ describe('stoar', function(){
       }
     });
     store.set('foo', true);
+  });
+
+  it('dont block a default emit when return undefined', function(done){
+    var store = new Stoar({data:{foo:null}});
+    var emitter = store.emitter({
+      'change:foo': function(){}
+    });
+    emitter.on('change:foo', function(){
+      done();
+    });
+    store.set('foo', true);
+  });
+
+  it('dont block a default emit when return truthy', function(done){
+    var store = new Stoar({data:{foo:null}});
+    var emitter = store.emitter({
+      'change:foo': function(){
+        return true;
+      }
+    });
+    emitter.on('change:foo', function(){
+      done();
+    });
+    store.set('foo', true);
+  });
+
+  it('block a default emit when return falsy', function(done){
+    var store = new Stoar({data:{foo:null}});
+    var emitter = store.emitter({
+      'change:foo': function(){
+        return false;
+      }
+    });
+    emitter.on('change:foo', function(){
+      throw new Error('didnt block');
+    });
+    store.set('foo', true);
+    done();
   });
 });
 
