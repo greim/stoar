@@ -10,7 +10,7 @@
 var assert = require('assert');
 var Stoar = require('../index');
 
-describe('jork', function(){
+describe('stoar', function(){
 
   it('should construct', function(){
     new Stoar({data:{}});
@@ -34,7 +34,7 @@ describe('jork', function(){
   it('should init with data', function(){
     new Stoar({
       init:function(){
-        assert.ok(this._data.foo === null);
+        assert.strictEqual(this.get('foo'), null);
       },
       data:{
         foo: null
@@ -63,8 +63,18 @@ describe('jork', function(){
     var store = new Stoar({data:{foo:null}});
     var dispatcher = store.dispatcher({commands:{}});
     var emitter = store.emitter({events:{}});
-    emitter.on('change:foo', function(value, old){
+    emitter.on('change:foo', function(value){
       assert.strictEqual(value, true);
+      done();
+    });
+    dispatcher.command('change:foo', true);
+  });
+
+  it('should provide previous value', function(done){
+    var store = new Stoar({data:{foo:null}});
+    var dispatcher = store.dispatcher({commands:{}});
+    var emitter = store.emitter({events:{}});
+    emitter.on('change:foo', function(value, old){
       assert.strictEqual(old, null);
       done();
     });
@@ -76,7 +86,7 @@ describe('jork', function(){
     var dispatcher = store.dispatcher({commands:{}});
     var emitter = store.emitter({events:{}});
     emitter.on('change:foo', function(value){
-      assert.strictEqual(this._store._data.foo, true);
+      assert.strictEqual(this.store._data.foo, true);
       done();
     });
     dispatcher.command('change:foo', true);
@@ -102,9 +112,8 @@ describe('jork', function(){
       }
     });
     var emitter = store.emitter({events:{}});
-    emitter.on('change:foo', function(value, old){
+    emitter.on('change:foo', function(value){
       assert.strictEqual(value, true);
-      assert.strictEqual(old, null);
       done();
     });
     dispatcher.command('custom', true);
@@ -115,9 +124,8 @@ describe('jork', function(){
     var dispatcher = store.dispatcher({commands:{}});
     var emitter = store.emitter({
       events:{'change:foo':'handleFooChange'},
-      handleFooChange: function(value, old){
+      handleFooChange: function(value){
         assert.strictEqual(value, true);
-        assert.strictEqual(old, null);
         done();
       }
     });
@@ -129,7 +137,7 @@ describe('jork', function(){
     var dispatcher = store.dispatcher({commands:{}});
     var emitter = store.emitter({
       events:{'change:foo':'handleFooChange'},
-      handleFooChange: function(value, old){
+      handleFooChange: function(value){
         this.emit('fooChange', 3);
       }
     });
@@ -159,6 +167,16 @@ describe('jork', function(){
   it('dispatcher should have this.store', function(done){
     var store = new Stoar({data:{foo:null}});
     var dispatcher = store.dispatcher({
+      init: function(){
+        assert.strictEqual(this.store, store);
+        done();
+      }
+    });
+  });
+
+  it('emitter should have this.store', function(done){
+    var store = new Stoar({data:{foo:null}});
+    var emitter = store.emitter({
       init: function(){
         assert.strictEqual(this.store, store);
         done();

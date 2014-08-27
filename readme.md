@@ -19,15 +19,25 @@ var store = new Stoar({
 });
 
 var emitter = store.emitter();
-emitter.on('change:count', function(newCount, oldCount){ ... });
+
+emitter.on('change:count', function(count){
+  console.log(count);
+});
+
 var dispatcher = store.dispatcher();
+
 dispatcher.command('change:count', 2);
+// log: 2
 ```
 
-A Stoar instance can contain arbitrary stuff.
+A Stoar instance can contain an init method that runs at construction time, and whatever data you want to put in it.
 
 ```js
 var store = new Stoar({
+  init: function(){
+    console.log(this.get('name'));
+    // log: "untitled"
+  },
   data: {
     count: 0,
     isFresh: true,

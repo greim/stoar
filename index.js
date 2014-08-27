@@ -97,6 +97,7 @@ function Emitter(store, args){
     args.events = {};
   }
   _.extend(this, args);
+  this.store = store;
   if (typeof this.init === 'function'){
     this.init.call(this);
   }
@@ -113,9 +114,8 @@ function Emitter(store, args){
       }
     }, this);
   }, this);
-  this._store = store;
   var self = this;
-  this._store._emitter.on('change', function(eventName, newValue, oldValue){
+  this.store._emitter.on('change', function(eventName, newValue, oldValue){
     self.emit('change:'+eventName, newValue, oldValue);
   });
 }
