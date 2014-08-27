@@ -43,12 +43,11 @@ var store = new Stoar({
 });
 
 var emitter = store.emitter();
+var dispatcher = store.dispatcher();
 
 emitter.on('change:count', function(count){
   console.log(count);
 });
-
-var dispatcher = store.dispatcher();
 
 dispatcher.command('change:count', 2);
 // log: 2

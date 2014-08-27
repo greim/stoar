@@ -83,7 +83,7 @@ describe('stoar', function(){
     var dispatcher = store.dispatcher();
     var emitter = store.emitter();
     emitter.on('change:foo', function(value){
-      assert.strictEqual(this.store._data.foo, true);
+      assert.strictEqual(this.store.get('foo'), true);
       done();
     });
     dispatcher.command('change:foo', true);
