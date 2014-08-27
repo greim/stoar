@@ -104,3 +104,13 @@ var emitter = store.emitter({
   init: function(){...}
 });
 ```
+
+## Building a Flux app
+
+A Stoar represents your application state.
+Views call `dispatcher.command()` when they want to change the state.
+Views call `emitter.on()` in order to know when to update themselves to reflect application state.
+In this way, data flow is strictly one-way.
+In other words, views never update themselves in response to other views, except via the store.
+
+
