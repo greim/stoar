@@ -21,14 +21,10 @@ var store = new Stoar({
 });
 ```
 
-A Stoar can also contain an init method that runs at construction time, and whatever data you want to put in there, starting with some defaults.
+A Stoar can contain whatever data you want to put in there, with defaults.
 
 ```js
 var store = new Stoar({
-  init: function(){
-    console.log(this.get('name'));
-    // log: "untitled"
-  },
   data: {
     count: 0,
     isFresh: true,
@@ -37,7 +33,9 @@ var store = new Stoar({
 });
 ```
 
-In its simplest incarnation a Stoar simply passes through change events.
+In addition to creating a Stoar, you create a dispatcher and an emitter.
+The dispatcher intercepts and mediates input, while the emitter intercepts and mediates output.
+In its simplest incarnation, it simply passes through change events.
 
 ```js
 var store = new Stoar({
@@ -47,15 +45,18 @@ var store = new Stoar({
 var emitter = store.emitter();
 var dispatcher = store.dispatcher();
 
+// listen to the emitter
 emitter.on('change:count', function(count, old){
   console.log('count changed from %d to %d', old, count);
 });
 
+// send commands to the dispatcher
 dispatcher.command('change:count', 2);
 // log: "count changed from 0 to 2"
 ```
 
 For each x in your store data, you can `dispatcher.command('change:x', newValue)` and also `emitter.on('change:x', handler)`.
+
 Not very interesting by itself.
 The power comes when you customize your dispatchers and emitters.
 
@@ -68,8 +69,8 @@ var dispatcher = store.dispatcher({
   fetch: function(){
     var store = this.store;
     store.set('loading', true);
-    fetch(function(data){
-      store.set('data', data);
+    fetch(function(items){
+      store.set('items', items);
       store.set('loading', false);
     });
   }
@@ -77,15 +78,8 @@ var dispatcher = store.dispatcher({
 dispatcher.command('fetch');
 ```
 
-Anyone who did `emitter.on('change:count')` or `emitter.on('change:isFresh')` would now be notified.
+Anyone listening to `change:loading` or `change:items` would be notified in the appropriate order.
 Custom commands give you more control of how the store gets updated.
-You can also have an optional `init` method which runs once at the start.
-
-```js
-var dispatcher = store.dispatcher({
-  init: function(){...}
-});
-```
 
 ## Emitters
 
@@ -102,11 +96,21 @@ var emitter = store.emitter({
 });
 ```
 
-Now anyone who did `emitter.on('countPassedThreshold', handler)` will be notified when the count increases to five or more.
-You can also have an optional `init` method which runs once at the start.
+Now anyone listening to `countPassedThreshold` will be notified when the count increases to five or more.
+
+## Init methods
+
+And, everything has an optional init function that runs once at creation time.
 
 ```js
+var store = new Stoar({
+  init: function(){...},
+  data: { count: 0 }
+});
 var emitter = store.emitter({
+  init: function(){...}
+});
+var dispatcher = store.dispatcher({
   init: function(){...}
 });
 ```
