@@ -65,12 +65,16 @@ You can add custom commands.
 
 ```js
 var dispatcher = store.dispatcher({
-  reset: function(){
-    this.store.set('count', 0);
-    this.store.set('isFresh', true);
+  fetch: function(){
+    var store = this.store;
+    store.set('loading', true);
+    fetch(function(data){
+      store.set('data', data);
+      store.set('loading', false);
+    });
   }
 });
-dispatcher.command('reset');
+dispatcher.command('fetch');
 ```
 
 Anyone who did `emitter.on('change:count')` or `emitter.on('change:isFresh')` would now be notified.
