@@ -153,4 +153,11 @@ Views call `emitter.on()` in order to know when to update themselves to reflect 
 In this way, data flow is strictly one-way.
 In other words, views never update themselves in response to other views, except via the dispatcher->store->emitter pathway.
 
+## Testing
+
+Have [mocha](http://visionmedia.github.io/mocha/) installed and run `npm test`.
+
+```sh
+% npm test
+```
 
