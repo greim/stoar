@@ -47,25 +47,28 @@ function Dispatcher(store, args){
   if (typeof this._ctx.init === 'function'){
     this._ctx.init.call(this._ctx);
   }
-  this._directCommands = {};
+  this._defaultCommands = {};
   _.each(store._data, function(value, prop){
-    this._directCommands['change:'+prop] = prop;
+    this._defaultCommands['change:'+prop] = prop;
   }, this);
 }
 
 _.extend(Dispatcher.prototype, {
   command: function(command, firstArg){
+    var hasDefault = this._defaultCommands.hasOwnProperty(command);
+    var retVal;
     if (!this._ctx.hasOwnProperty(command)){
-      if (this._directCommands.hasOwnProperty(command)){
-        var prop = this._directCommands[command];
-        this._ctx.store.set(prop, firstArg);
-      } else {
+      if (!hasDefault){
         throw new Error(util.format('%s is not a command', command));
       }
     } else {
       var args = Array.prototype.slice.call(arguments);
       args.shift();
-      this._ctx[command].apply(this._ctx, args);
+      retVal = this._ctx[command].apply(this._ctx, args);
+    }
+    if (hasDefault && (retVal === undefined || retVal)){
+      var prop = this._defaultCommands[command];
+      this._ctx.store.set(prop, firstArg);
     }
   }
 });

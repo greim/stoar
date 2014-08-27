@@ -142,18 +142,55 @@ describe('stoar', function(){
     dispatcher.command('change:foo', true);
   });
 
-  it('custom commands should override default ones', function(done){
-    var aVal = null;
+  it('custom commands should precede default ones of same name', function(done){
+    var aVal = '';
     var store = new Stoar({data:{foo:null}});
     var dispatcher = store.dispatcher({
-      'change:foo': function(val){aVal = val;}
+      'change:foo': function(val){aVal += 'a';}
     });
     var emitter = store.emitter();
     emitter.on('change:foo', function(num){
-      done(new Error('no override!'));
+      aVal += 'b';
     });
     dispatcher.command('change:foo', true);
-    assert.strictEqual(aVal, true);
+    assert.strictEqual(aVal, 'ab');
+    done();
+  });
+
+  it('dont block a default command if return undefined', function(done){
+    var val = '';
+    var store = new Stoar({data:{foo:null}});
+    var emitter = store.emitter();
+    var dispatcher = store.dispatcher({
+      'change:foo': function(){
+        val += 'a';
+      }
+    });
+    emitter.on('change:foo', function(num){
+      val += 'b';
+    });
+    dispatcher.command('change:foo', true);
+    assert.strictEqual(val, 'ab');
+    assert.strictEqual(store.get('foo'), true);
+    done();
+  });
+
+  it('block a default command if return falsy', function(done){
+    var val = '';
+    var store = new Stoar({data:{foo:null}});
+    var emitter = store.emitter();
+    var dispatcher = store.dispatcher({
+      'change:foo': function(){
+        val += 'a';
+        return false;
+      }
+    });
+    emitter.on('change:foo', function(num){
+      val += 'b';
+    });
+    dispatcher.command('change:foo', true);
+    assert.strictEqual(val, 'a');
+    assert.strictEqual(store.get('foo'), null);
     done();
   });
 
