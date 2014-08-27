@@ -19,7 +19,7 @@ var store = new Stoar({
 });
 ```
 
-A Stoar can also contain an init method that runs at construction time, and whatever data you want to put in there.
+A Stoar can also contain an init method that runs at construction time, and whatever data you want to put in there, starting with some defaults.
 
 ```js
 var store = new Stoar({
