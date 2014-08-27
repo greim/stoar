@@ -45,12 +45,12 @@ var store = new Stoar({
 var emitter = store.emitter();
 var dispatcher = store.dispatcher();
 
-emitter.on('change:count', function(count){
-  console.log(count);
+emitter.on('change:count', function(count, old){
+  console.log('count changed from %d to %d', old, count);
 });
 
 dispatcher.command('change:count', 2);
-// log: 2
+// log: "count changed from 0 to 2"
 ```
 
 For each x in your store data, you can `dispatcher.command('change:x', newValue)` and also `emitter.on('change:x', handler)`.
