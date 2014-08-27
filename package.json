@@ -1,6 +1,6 @@
 {
   "name": "stoar",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Implementation of flux dispatcher and data store",
   "main": "index.js",
   "scripts": {
