@@ -76,25 +76,42 @@ _.extend(Dispatcher.prototype, {
 // ======================================================
 // EMITTER
 
-function Emitter(store, args){
-  EventEmitter.call(this);
+function EmitterContext(store, args){
   _.extend(this, args);
   this.store = store;
-  if (typeof this.init === 'function'){
-    this.init.call(this);
-  }
-  _.each(this, function(methodFunc, event){
-    if (typeof methodFunc === 'function' && event !== 'init'){
-      this.on(event, methodFunc);
-    }
-  }, this);
+}
+
+function Emitter(store, args){
   var self = this;
-  this.store._emitter.on('change', function(eventName, newValue, oldValue){
-    self.emit('change:'+eventName, newValue, oldValue);
+  EventEmitter.call(this);
+  this._ctx = new EmitterContext(store, args);
+  this._ctx._emitter = this;
+  if (typeof this._ctx.init === 'function'){
+    this._ctx.init.call(this._ctx);
+  }
+  store._emitter.on('change', function(prop, val, old){
+    var changeEv = 'change:' + prop;
+    var func = self._ctx[changeEv];
+    var retVal;
+    if (typeof func === 'function'){
+      retVal = func.call(self._ctx, val, old);
+    }
+    if (retVal === undefined || retVal){
+      self.emit(changeEv, val, old);
+    }
   });
 }
 
 util.inherits(Emitter, EventEmitter);
+
+_.extend(EmitterContext.prototype, {
+  emit: function(){
+    return this._emitter.emit.apply(this._emitter, arguments);
+  }
+});
+
+// ======================================================
+// DONE
 
 module.exports = Store;
 
