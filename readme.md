@@ -4,7 +4,7 @@ A [Flux](http://facebook.github.io/react/docs/flux-overview.html) data store pro
 This is not a complete Flux implementation, just the store and dispatcher part.
 
 ```sh
-% npm install stoar
+% npm install stoar # note: not actually published to npm yet
 ```
 
 ```js
