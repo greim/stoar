@@ -44,12 +44,8 @@ _.extend(Store.prototype, {
 // DISPATCHER
 
 function Dispatcher(store, args){
-  if (!args.hasOwnProperty('commands')){
-    args.commands = {};
-  }
   this._ctx = _.extend({}, args);
   this._ctx.store = store;
-  this._ctx.command = _.bind(this.command, this);
   if (typeof this._ctx.init === 'function'){
     this._ctx.init.call(this._ctx);
   }
@@ -57,21 +53,11 @@ function Dispatcher(store, args){
   _.each(store._data, function(value, prop){
     this._directCommands['change:'+prop] = prop;
   }, this);
-  _.each(this._ctx.commands, function(methods, command){
-    if (!Array.isArray(methods)){
-      methods = this._ctx.commands[command] = [methods];
-    }
-    _.each(methods, function(method){
-      if (typeof this._ctx[method] !== 'function'){
-        throw new Error(util.format('%s is not a function', method));
-      }
-    }, this);
-  }, this);
 }
 
 _.extend(Dispatcher.prototype, {
   command: function(command, firstArg){
-    if (!this._ctx.commands.hasOwnProperty(command)){
+    if (!this._ctx.hasOwnProperty(command)){
       if (this._directCommands.hasOwnProperty(command)){
         var prop = this._directCommands[command];
         this._ctx.store.set(prop, firstArg);
@@ -79,12 +65,9 @@ _.extend(Dispatcher.prototype, {
         throw new Error(util.format('%s is not a command', command));
       }
     } else {
-      var methods = this._ctx.commands[command];
       var args = Array.prototype.slice.call(arguments);
       args.shift();
-      methods.forEach(function(name){
-        this._ctx[name].apply(this._ctx, args);
-      }, this);
+      this._ctx[command].apply(this._ctx, args);
     }
   }
 });
@@ -94,26 +77,15 @@ _.extend(Dispatcher.prototype, {
 
 function Emitter(store, args){
   EventEmitter.call(this);
-  if (!args.hasOwnProperty('events')){
-    args.events = {};
-  }
   _.extend(this, args);
   this.store = store;
   if (typeof this.init === 'function'){
     this.init.call(this);
   }
-  _.each(this.events, function(methods, event){
-    if (!Array.isArray(methods)){
-      methods = this.events[event] = [methods];
+  _.each(this, function(methodFunc, event){
+    if (typeof methodFunc === 'function' && event !== 'init'){
+      this.on(event, methodFunc);
     }
-    _.each(methods, function(method){
-      var methodFunc = this[method];
-      if (typeof methodFunc !== 'function'){
-        throw new Error(util.format('%s is not a function', method));
-      } else {
-        this.on(event, methodFunc);
-      }
-    }, this);
   }, this);
   var self = this;
   this.store._emitter.on('change', function(eventName, newValue, oldValue){

@@ -1,6 +1,3 @@
-/*******************************************************************************
- * @copyright (c) Wayin, Inc. All Rights Reserved.
- ******************************************************************************/
 
 /*
  * MOCHA TESTS
@@ -49,20 +46,20 @@ describe('stoar', function(){
 
   it('should create a dispatcher', function(){
     var store = new Stoar({data:{foo:null}});
-    var dispatcher = store.dispatcher({commands:{}});
+    var dispatcher = store.dispatcher();
     assert.ok(dispatcher);
   });
 
   it('should create an emitter', function(){
     var store = new Stoar({data:{foo:null}});
-    var emitter = store.emitter({events:{}});
+    var emitter = store.emitter();
     assert.ok(emitter);
   });
 
   it('should pass thru a command', function(done){
     var store = new Stoar({data:{foo:null}});
-    var dispatcher = store.dispatcher({commands:{}});
-    var emitter = store.emitter({events:{}});
+    var dispatcher = store.dispatcher();
+    var emitter = store.emitter();
     emitter.on('change:foo', function(value){
       assert.strictEqual(value, true);
       done();
@@ -72,8 +69,8 @@ describe('stoar', function(){
 
   it('should provide previous value', function(done){
     var store = new Stoar({data:{foo:null}});
-    var dispatcher = store.dispatcher({commands:{}});
-    var emitter = store.emitter({events:{}});
+    var dispatcher = store.dispatcher();
+    var emitter = store.emitter();
     emitter.on('change:foo', function(value, old){
       assert.strictEqual(old, null);
       done();
@@ -83,8 +80,8 @@ describe('stoar', function(){
 
   it('should update store on passing thru a command', function(done){
     var store = new Stoar({data:{foo:null}});
-    var dispatcher = store.dispatcher({commands:{}});
-    var emitter = store.emitter({events:{}});
+    var dispatcher = store.dispatcher();
+    var emitter = store.emitter();
     emitter.on('change:foo', function(value){
       assert.strictEqual(this.store._data.foo, true);
       done();
@@ -94,8 +91,8 @@ describe('stoar', function(){
 
   it('emitter handler should make this be emitter', function(done){
     var store = new Stoar({data:{foo:null}});
-    var dispatcher = store.dispatcher({commands:{}});
-    var emitter = store.emitter({events:{}});
+    var dispatcher = store.dispatcher();
+    var emitter = store.emitter();
     emitter.on('change:foo', function(value){
       assert.strictEqual(this, emitter);
       done();
@@ -106,12 +103,11 @@ describe('stoar', function(){
   it('should handle a custom command', function(done){
     var store = new Stoar({data:{foo:null}});
     var dispatcher = store.dispatcher({
-      commands:{custom:'customHandler'},
-      customHandler:function(val){
-        this.command('change:foo', val)
+      custom:function(val){
+        this.store.set('foo', val)
       }
     });
-    var emitter = store.emitter({events:{}});
+    var emitter = store.emitter();
     emitter.on('change:foo', function(value){
       assert.strictEqual(value, true);
       done();
@@ -121,10 +117,9 @@ describe('stoar', function(){
 
   it('should receive a custom event', function(done){
     var store = new Stoar({data:{foo:null}});
-    var dispatcher = store.dispatcher({commands:{}});
+    var dispatcher = store.dispatcher();
     var emitter = store.emitter({
-      events:{'change:foo':'handleFooChange'},
-      handleFooChange: function(value){
+      'change:foo': function(value){
         assert.strictEqual(value, true);
         done();
       }
@@ -134,10 +129,9 @@ describe('stoar', function(){
 
   it('should pass along a custom event', function(done){
     var store = new Stoar({data:{foo:null}});
-    var dispatcher = store.dispatcher({commands:{}});
+    var dispatcher = store.dispatcher();
     var emitter = store.emitter({
-      events:{'change:foo':'handleFooChange'},
-      handleFooChange: function(value){
+      'change:foo': function(value){
         this.emit('fooChange', 3);
       }
     });
@@ -152,10 +146,9 @@ describe('stoar', function(){
     var aVal = null;
     var store = new Stoar({data:{foo:null}});
     var dispatcher = store.dispatcher({
-      commands:{'change:foo':'fooChange'},
-      fooChange: function(val){aVal = val;}
+      'change:foo': function(val){aVal = val;}
     });
-    var emitter = store.emitter({events:{}});
+    var emitter = store.emitter();
     emitter.on('change:foo', function(num){
       done(new Error('no override!'));
     });
@@ -164,7 +157,7 @@ describe('stoar', function(){
     done();
   });
 
-  it('dispatcher should have this.store', function(done){
+  it('dispatcher init should have this.store', function(done){
     var store = new Stoar({data:{foo:null}});
     var dispatcher = store.dispatcher({
       init: function(){
@@ -174,7 +167,18 @@ describe('stoar', function(){
     });
   });
 
-  it('emitter should have this.store', function(done){
+  it('dispatcher method should have this.store', function(done){
+    var store = new Stoar({data:{foo:null}});
+    store.dispatcher({
+      foo: function(){
+        assert.strictEqual(this.store, store);
+        done();
+      }
+    }).command('foo');
+
+  });
+
+  it('emitter init should have this.store', function(done){
     var store = new Stoar({data:{foo:null}});
     var emitter = store.emitter({
       init: function(){
@@ -182,6 +186,17 @@ describe('stoar', function(){
         done();
       }
     });
+  });
+
+  it('emitter method should have this.store', function(done){
+    var store = new Stoar({data:{foo:null}});
+    var emitter = store.emitter({
+      'change:foo': function(){
+        assert.strictEqual(this.store, store);
+        done();
+      }
+    });
+    store.set('foo', true);
   });
 });
 

@@ -35,7 +35,7 @@ var store = new Stoar({
 });
 ```
 
-In its simplest incarnation a Stoar instance simply passes through change events.
+In its simplest incarnation a Stoar simply passes through change events.
 
 ```js
 var store = new Stoar({
@@ -64,8 +64,7 @@ You can add custom commands.
 
 ```js
 var dispatcher = store.dispatcher({
-  commands: {reset:'handleReset'},
-  handleReset: function(){
+  reset: function(){
     this.store.set('count', 0);
     this.store.set('isFresh', true);
   }
@@ -75,6 +74,13 @@ dispatcher.command('reset');
 
 Custom commands give you more control of how the store gets updated.
 Anyone doing `emitter.on('change:count')` or `emitter.on('change:isFresh')` would now be notified.
+You can also have an optional `init` method which runs once at the start.
+
+```js
+var dispatcher = store.dispatcher({
+  init: function(){...}
+});
+```
 
 ## Emitters
 
@@ -83,8 +89,7 @@ Like dispatchers, emitters get more interesting when you add custom events.
 
 ```js
 var emitter = store.emitter({
-  events: {'change:count':'handleCountChange'},
-  handleCountChange: function(newCount, oldCount){
+  'change:count': function(newCount, oldCount){
     if (newCount >= 5 && oldCount < 5){
       this.emit('countPassedThreshold');
     }
@@ -93,3 +98,10 @@ var emitter = store.emitter({
 ```
 
 Now anyone can be notified when the count increases to five or more.
+You can also have an optional `init` method which runs once at the start.
+
+```js
+var emitter = store.emitter({
+  init: function(){...}
+});
+```
