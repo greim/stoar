@@ -1,5 +1,7 @@
 # Stoar
 
+Note: this library is still experimental.
+
 A [Flux](http://facebook.github.io/react/docs/flux-overview.html) data store providing dispatcher and event emitter capabilities.
 This is not a complete Flux implementation, just the store and dispatcher part.
 
@@ -11,7 +13,7 @@ This is not a complete Flux implementation, just the store and dispatcher part.
 var Stoar = require('stoar');
 ```
 
-It's easy to make a Stoar.
+How to make a Stoar.
 
 ```js
 var store = new Stoar({
