@@ -1,0 +1,18 @@
+{
+  "name": "stoar",
+  "version": "0.0.0",
+  "description": "Implementation of flux dispatcher and store",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "flux",
+    "store"
+  ],
+  "author": "gregreimer@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^2.4.1"
+  }
+}
