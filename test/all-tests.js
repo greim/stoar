@@ -212,7 +212,18 @@ describe('stoar', function(){
         done();
       }
     }).command('foo');
+  });
 
+  it('dispatcher method should receive all params', function(done){
+    var store = new Stoar({data:{foo:null}});
+    store.dispatcher({
+      foo: function(a, b, c){
+        assert.strictEqual(a, 1);
+        assert.strictEqual(b, 2);
+        assert.strictEqual(c, 3);
+        done();
+      }
+    }).command('foo', 1, 2, 3);
   });
 
   it('emitter init should have this.store', function(done){
