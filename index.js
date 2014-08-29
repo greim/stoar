@@ -16,13 +16,24 @@ function Store(args){
   this._emitter = new EventEmitter();
 }
 
+var immutableTypes = {
+  'boolean':true,
+  'string':true,
+  'number':true,
+  'function':true,
+  'undefined': true
+};
+
 _.extend(Store.prototype, {
 
   set: function(prop, newVal){
     var oldVal = this._data[prop];
-    var isDifferent = oldVal !== newVal;
-    this._data[prop] = newVal;
-    this._emitter.emit('change', prop, newVal, oldVal);
+    var isImmut = newVal === null || immutableTypes.hasOwnProperty(typeof newVal);
+    var shouldChange = !isImmut || oldVal !== newVal;
+    if (shouldChange){
+      this._data[prop] = newVal;
+      this._emitter.emit('change', prop, newVal, oldVal);
+    }
   },
 
   get: function(prop){

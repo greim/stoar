@@ -342,5 +342,54 @@ describe('stoar', function(){
     });
     store.set('foo', true);
   });
+
+  it('should not emit when immutables are set to the same value', function(){
+    var store = new Stoar({data:{foo:1}});
+    var emitter = store.emitter();
+    emitter.on('change:foo', function(){
+      throw new Error('change event on immutable sameness');
+    });
+    store.set('foo', 1);
+  });
+
+  it('should not emit when null is set to null', function(){
+    var store = new Stoar({data:{foo:null}});
+    var emitter = store.emitter();
+    emitter.on('change:foo', function(){
+      throw new Error('change event on null sameness');
+    });
+    store.set('foo', null);
+  });
+
+  it('should not emit when undefined is set to undefined', function(){
+    var store = new Stoar({data:{foo:undefined}});
+    var emitter = store.emitter();
+    emitter.on('change:foo', function(){
+      throw new Error('change event on undefined sameness');
+    });
+    store.set('foo', undefined);
+  });
+
+  it('should emit when undefined is set to null', function(){
+    var store = new Stoar({data:{foo:undefined}});
+    var emitter = store.emitter();
+    var success = false;
+    emitter.on('change:foo', function(){
+      success = true;
+    });
+    store.set('foo', null);
+    assert.ok(success);
+  });
+
+  it('should emit when null is set to undefined', function(){
+    var store = new Stoar({data:{foo:null}});
+    var emitter = store.emitter();
+    var success = false;
+    emitter.on('change:foo', function(){
+      success = true;
+    });
+    store.set('foo', undefined);
+    assert.ok(success);
+  });
 });
 
