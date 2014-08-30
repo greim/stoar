@@ -32,7 +32,44 @@ var store = new Stoar({
     name: 'untitled'
   }
 });
+var count = store.get('count'); // 0
+store.set('count', 1);
+count = store.get('count'); // 1
 ```
+
+## Immutability and Cloning
+
+JS objects aren't immutable, but treating them as such can avoid bugs and slowness.
+Thus, it might sometimes be helpful to `clone()` instead of `get()`.
+(Note: cloning internally uses lodash's clone methods.)
+
+```js
+var store = new Stoar({
+  data: {
+    flags: {
+      foo: true,
+      bar: false
+    }
+  }
+});
+var flags = store.clone('flags');
+flags.bar = true;
+store.set('flags', flags);
+```
+
+If we hadn't used `clone()` above, `flags.bar = true` would have altered the
+state of any views currently holding a reference to the flags object, *without*
+also notifying them of the change. When they finally were notified, the view
+would have had no way to tell that the incoming value was any different from the
+previous one, since it had been silently overwritten.
+
+You can optionally deep clone by passing `true`:
+
+```js
+var deepClone = store.clone('stuff', true);
+```
+
+## Dispatchers and Emitters
 
 In addition to creating a Stoar, you create a dispatcher and an emitter.
 The dispatcher intercepts and mediates input, while the emitter intercepts and mediates output.

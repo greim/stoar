@@ -52,19 +52,28 @@ describe('stoar', function(){
     assert.ok(foo !== clonedFoo);
   });
 
+  it('should shallow clone', function(){
+    var foo = {bar:{bar:'baz'}};
+    var store = new Stoar({data:{foo:foo}});
+    var clonedFoo = store.clone('foo');
+    assert.deepEqual(foo, clonedFoo);
+    assert.ok(foo !== clonedFoo);
+    assert.ok(foo.bar === clonedFoo.bar);
+  });
+
   it('should deep clone', function(){
     var foo = {bar:{baz:'a'}};
     var store = new Stoar({data:{foo:foo}});
-    var clonedFoo = store.clone('foo');
+    var clonedFoo = store.clone('foo', true);
     assert.deepEqual(foo, clonedFoo);
     assert.ok(foo.bar !== clonedFoo.bar);
   });
 
-  it('cloning should allow non-json types', function(){
+  it('deep cloning should allow non-json types', function(){
     var func = function(){}
     var foo = {bar:{baz:func}};
     var store = new Stoar({data:{foo:foo}});
-    var clonedFoo = store.clone('foo');
+    var clonedFoo = store.clone('foo', true);
     assert.deepEqual(foo, clonedFoo);
     assert.strictEqual(func, clonedFoo.bar.baz);
   });
@@ -73,6 +82,37 @@ describe('stoar', function(){
     var store = new Stoar({data:{foo:'foo'}});
     var clonedFoo = store.clone('foo');
     assert.strictEqual('foo', clonedFoo);
+  });
+
+  it('deep clone doesnt break on immutables', function(){
+    var store = new Stoar({data:{foo:'foo'}});
+    var clonedFoo = store.clone('foo', true);
+    assert.strictEqual('foo', clonedFoo);
+  });
+
+  it('should clone arrays', function(){
+    var foo = ['a','b','c'];
+    var store = new Stoar({data:{foo:foo}});
+    var clonedFoo = store.clone('foo');
+    assert.deepEqual(foo, clonedFoo);
+    assert.ok(foo !== clonedFoo);
+  });
+
+  it('should shallow clone arrays', function(){
+    var foo = ['a','b',{x:'y'}];
+    var store = new Stoar({data:{foo:foo}});
+    var clonedFoo = store.clone('foo');
+    assert.deepEqual(foo, clonedFoo);
+    assert.ok(foo[2] === clonedFoo[2]);
+  });
+
+  it('should deep clone arrays', function(){
+    var foo = ['a','b',{x:'y'}];
+    var store = new Stoar({data:{foo:foo}});
+    var clonedFoo = store.clone('foo', true);
+    assert.deepEqual(foo, clonedFoo);
+    assert.deepEqual(foo[2], clonedFoo[2]);
+    assert.ok(foo[2] !== clonedFoo[2]);
   });
 
   it('should create a dispatcher', function(){
