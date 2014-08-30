@@ -44,6 +44,37 @@ describe('stoar', function(){
     assert.strictEqual(store.get('foo'), null);
   });
 
+  it('should clone', function(){
+    var foo = {bar:'a'};
+    var store = new Stoar({data:{foo:foo}});
+    var clonedFoo = store.clone('foo');
+    assert.deepEqual(foo, clonedFoo);
+    assert.ok(foo !== clonedFoo);
+  });
+
+  it('should deep clone', function(){
+    var foo = {bar:{baz:'a'}};
+    var store = new Stoar({data:{foo:foo}});
+    var clonedFoo = store.clone('foo');
+    assert.deepEqual(foo, clonedFoo);
+    assert.ok(foo.bar !== clonedFoo.bar);
+  });
+
+  it('cloning should allow non-json types', function(){
+    var func = function(){}
+    var foo = {bar:{baz:func}};
+    var store = new Stoar({data:{foo:foo}});
+    var clonedFoo = store.clone('foo');
+    assert.deepEqual(foo, clonedFoo);
+    assert.strictEqual(func, clonedFoo.bar.baz);
+  });
+
+  it('clone doesnt break on immutables', function(){
+    var store = new Stoar({data:{foo:'foo'}});
+    var clonedFoo = store.clone('foo');
+    assert.strictEqual('foo', clonedFoo);
+  });
+
   it('should create a dispatcher', function(){
     var store = new Stoar({data:{foo:null}});
     var dispatcher = store.dispatcher();

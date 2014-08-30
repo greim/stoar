@@ -40,6 +40,15 @@ _.extend(Store.prototype, {
     return this._data[prop];
   },
 
+  clone: function(prop){
+    var val = this._data[prop];
+    if (!immutableTypes.hasOwnProperty(typeof val) || val === null){
+      return _.cloneDeep(val);
+    } else {
+      return val;
+    }
+  },
+
   dispatcher: function(args){
     return new Dispatcher(this, args);
   },
