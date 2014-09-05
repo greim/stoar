@@ -39,9 +39,9 @@ store.forEach('foods', function(food){
 
 Each data item receives a definition, which is an object with `type`, `value` and `validate` properties.
 
-  * `type` - Possible values include: `'item'`, `'map'`, and `'list'`. Optional; defaults to `'item'`. The `type` determines what kinds of operations are available on this store property.
-  * `value` - The initial value of this property in the store. If `type === 'map'`, this must be a plain object. If `type === 'list'`, this must be an array. This is optional, with a default value depending on `type`.
-  * `validate` - An optional function that runs against every value set on this store property. For `'map'` and `'list'` types, this runs against every item in that map or list. It should throw for bad values. The return value is discarded.
+  * *type* - Possible values include: `item`, `map`, and `list`. Optional; defaults to `item`. The `type` determines what kinds of operations are available on this store property.
+  * *value* - The initial value of this property in the store. If `type === 'map`, this must be a plain object. If `type === ''list'`, this must be an array. This is optional, with a default value depending on `type`.
+  * *validate* - An optional function that runs against every value set on this store property. For `map` and `list` types, this runs against every item in that map or list. It should throw for bad values. The return value is discarded.
 
 ## Immutability and Cloning
 
