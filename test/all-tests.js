@@ -9,37 +9,15 @@ var Stoar = require('../index');
 
 describe('stoar', function(){
 
-  it('should construct', function(){
+  it('should construct with data', function(){
     new Stoar({data:{}});
   });
 
-  it('should init', function(done){
-    new Stoar({init:done,data:{}});
+  it('should construct with defs', function(){
+    new Stoar({defs:{}});
   });
 
-  it('should init with this', function(){
-    new Stoar({
-      init:function(){
-        assert.ok(this instanceof Stoar);
-      },
-      data:{
-        foo: null
-      }
-    });
-  });
-
-  it('should init with data', function(){
-    new Stoar({
-      init:function(){
-        assert.strictEqual(this.get('foo'), null);
-      },
-      data:{
-        foo: null
-      }
-    });
-  });
-
-  it('should get', function(){
+  it('should get data', function(){
     var store = new Stoar({data:{foo:null}});
     assert.strictEqual(store.get('foo'), null);
   });
@@ -284,16 +262,6 @@ describe('stoar', function(){
     done();
   });
 
-  it('dispatcher init should have this.store', function(done){
-    var store = new Stoar({data:{foo:null}});
-    var dispatcher = store.dispatcher({
-      init: function(){
-        assert.strictEqual(this.store, store);
-        done();
-      }
-    });
-  });
-
   it('dispatcher method should have this.store', function(done){
     var store = new Stoar({data:{foo:null}});
     store.dispatcher({
@@ -314,16 +282,6 @@ describe('stoar', function(){
         done();
       }
     }).command('foo', 1, 2, 3);
-  });
-
-  it('emitter init should have this.store', function(done){
-    var store = new Stoar({data:{foo:null}});
-    var emitter = store.emitter({
-      init: function(){
-        assert.strictEqual(this.store, store);
-        done();
-      }
-    });
   });
 
   it('emitter method should have this.store', function(done){
@@ -421,6 +379,14 @@ describe('stoar', function(){
       throw new Error('change event on immutable sameness');
     });
     store.set('foo', 1);
+  });
+
+  it('should throw when mutables are set to same value', function(){
+    var obj = {}
+    var store = new Stoar({data:{foo:obj}});
+    assert.throws(function(){
+      store.set('foo', obj);
+    })
   });
 
   it('should not emit when null is set to null', function(){
