@@ -2,8 +2,8 @@
 
 Note: this library is still experimental.
 
-A [Flux](http://facebook.github.io/react/docs/flux-overview.html) data store providing dispatcher and event emitter capabilities.
-This is not a complete Flux implementation, just the store and dispatcher part.
+A [Flux](http://facebook.github.io/react/docs/flux-overview.html) data store.
+This is not a complete Flux implementation, just the store part.
 This lib makes very few assumptions or opinions about your overall Flux app structure.
 
 ```sh
@@ -80,17 +80,17 @@ var deepClone = store.clone('stuff', true);
  * `store.set(prop, val)` - Updates the item to the given value.
  * `store.unset(prop)` - Sets the item to undefined.
  * `store.get(prop)` - Returns the item.
- * `store.clone(prop, [deep])` - Returns a clone of the item. Set `deep` to true for a deep clone.
+ * `store.clone(prop, [isDeep])` - Returns a clone of the item.
 
 ### Maps
 
  * `store.set(prop, key, val)` - Updates the value at the given key.
- * `store.unset(prop, key)` - Deletes the value the given key.
+ * `store.unset(prop, key)` - Deletes the value at the given key.
  * `store.setAll(prop, newMap)` - Merges in the new values.
  * `store.resetAll(prop, newMap)` - Overwrites the map with the new values.
  * `store.clear(prop)` - Empties out the map.
  * `store.get(prop, key)` - Returns the value at the given key.
- * `store.clone(prop, deep)` - Clone the value at the given key. Set `deep` to true for a deep clone.
+ * `store.clone(prop, isDeep)` - Clone the value at the given key.
  * `store.has(prop, key)` - Returns true if the map has the given key as an own property.
  * `store.getAll(prop)` - Returns a copy of the map. Modifying the copy will not change the map.
  * `store.keys(prop)` - Returns an array of map keys.
@@ -107,11 +107,12 @@ var deepClone = store.clone('stuff', true);
  * `store.pop(prop)` - Removes and returns the last value.
  * `store.shift(prop)` - Removes and returns the first value.
  * `store.get(prop, idx)` - Returns the value at the given index.
- * `store.clone(prop, idx, deep)` - Clone the value at the given index. Set `deep` to true for a deep clone.
+ * `store.clone(prop, idx, isDeep)` - Clone the value at the given index.
  * `store.length(prop)` - Returns the length.
  * `store.getAll(prop)` - Returns a copy of the list. Modifying the copy will not change the list.
 
 All of these are strictly accessors and apply directly into the corresponding `Array.prototype` method, with `prop` shifted off the args.
+In old browsers you must polyfill these on `Array.prototype` before calling them.
 
  * `store.filter(prop, ...)`
  * `store.map(prop, ...)`
