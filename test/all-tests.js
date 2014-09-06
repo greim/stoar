@@ -5,6 +5,7 @@
  */
 
 var assert = require('assert');
+var await = require('await');
 var Stoar = require('../index');
 
 describe('stoar', function(){
@@ -649,48 +650,6 @@ describe('maps', function(){
       assert.ok(obj.blah !== obj2.blah)
       assert.deepEqual(obj, obj2)
     })
-  })
-
-  describe('mutators', function(){
-
-    it('should set', function(){
-      var store = new Stoar({
-        defs: { foo:{
-          type: 'map',
-          value: {a:1}
-        }}
-      })
-      store.set('foo', 'a', 2)
-      assert.strictEqual(store.get('foo', 'a'), 2)
-    })
-
-    it('should validate set', function(){
-      var store = new Stoar({
-        defs: { foo:{
-          type: 'map',
-          value: {a:1},
-          validate: function(val){
-            if (val < 0) throw 'bad'
-          }
-        }}
-      })
-      assert.throws(function(){
-        store.set('foo', 'a', -1)
-      }, /bad/)
-    })
-
-    it('should unset', function(){
-      var store = new Stoar({
-        defs: { foo:{
-          type: 'map',
-          value: {a:1}
-        }}
-      })
-      assert.ok(store.has('foo','a'))
-      store.unset('foo', 'a')
-      assert.strictEqual(store.get('foo','a'), undefined)
-      assert.ok(!store.has('foo','a'))
-    })
 
     it('should getAll', function(){
       var store = new Stoar({defs:{
@@ -715,75 +674,6 @@ describe('maps', function(){
       var flags2 = store.getAll('flags')
       assert.deepEqual(flags,flags2)
       assert.ok(flags !== flags2)
-    })
-
-    it('should setAll', function(){
-      var store = new Stoar({defs:{
-        flags: {
-          type: 'map',
-          value: {
-            foo:true
-          }
-        }
-      }})
-      store.setAll('flags', {bar:false,baz:true})
-      assert.deepEqual(store.getAll('flags'),{foo:true,bar:false,baz:true})
-    })
-
-    it('should validate setAll', function(){
-      var store = new Stoar({
-        defs: { foo:{
-          type: 'map',
-          value: {a:1},
-          validate: function(val){
-            if (val < 0) throw 'bad'
-          }
-        }}
-      })
-      assert.throws(function(){
-        store.setAll('foo', {x:-1})
-      }, /bad/)
-    })
-
-    it('should resetAll', function(){
-      var store = new Stoar({defs:{
-        flags: {
-          type: 'map',
-          value: {
-            foo:true
-          }
-        }
-      }})
-      store.resetAll('flags', {bar:false,baz:true})
-      assert.deepEqual(store.getAll('flags'),{bar:false,baz:true})
-    })
-
-    it('should validate resetAll', function(){
-      var store = new Stoar({
-        defs: { foo:{
-          type: 'map',
-          value: {a:1},
-          validate: function(val){
-            if (val < 0) throw 'bad'
-          }
-        }}
-      })
-      assert.throws(function(){
-        store.resetAll('foo', {x:-1})
-      })
-    })
-
-    it('should clear', function(){
-      var store = new Stoar({defs:{
-        flags: {
-          type: 'map',
-          value: {
-            foo:true
-          }
-        }
-      }})
-      store.clear('flags')
-      assert.deepEqual(store.getAll('flags'),{})
     })
 
     it('should has', function(){
@@ -864,6 +754,225 @@ describe('maps', function(){
       store.forEach('flags',function(val, key){
         assert.strictEqual(that, this)
       }, that)
+    })
+  })
+
+  describe('mutators', function(){
+
+    it('should set', function(){
+      var store = new Stoar({
+        defs: { foo:{
+          type: 'map',
+          value: {a:1}
+        }}
+      })
+      store.set('foo', 'a', 2)
+      assert.strictEqual(store.get('foo', 'a'), 2)
+    })
+
+    it('should change on set', function(done){
+      var store = new Stoar({
+        defs: { foo:{
+          type: 'map',
+          value: {a:1}
+        }}
+      })
+      store.on('propChange',function(prop, ch){
+        assert.strictEqual(prop, 'foo')
+        assert.strictEqual(ch.oldVal, 1)
+        assert.strictEqual(ch.newVal, 2)
+        assert.strictEqual(ch.key, 'a')
+        done()
+      })
+      store.set('foo', 'a', 2)
+    })
+
+    it('should validate set', function(){
+      var store = new Stoar({
+        defs: { foo:{
+          type: 'map',
+          value: {a:1},
+          validate: function(val){
+            if (val < 0) throw 'bad'
+          }
+        }}
+      })
+      assert.throws(function(){
+        store.set('foo', 'a', -1)
+      }, /bad/)
+    })
+
+    it('should unset', function(){
+      var store = new Stoar({
+        defs: { foo:{
+          type: 'map',
+          value: {a:1}
+        }}
+      })
+      assert.ok(store.has('foo','a'))
+      store.unset('foo', 'a')
+      assert.strictEqual(store.get('foo','a'), undefined)
+      assert.ok(!store.has('foo','a'))
+    })
+
+    it('should change on unset', function(done){
+      var store = new Stoar({
+        defs: { foo:{
+          type: 'map',
+          value: {a:1}
+        }}
+      })
+      store.on('propChange',function(prop, ch){
+        assert.strictEqual(prop, 'foo')
+        assert.strictEqual(ch.oldVal, 1)
+        assert.strictEqual(ch.newVal, undefined)
+        assert.strictEqual(ch.key, 'a')
+        done()
+      })
+      store.unset('foo', 'a')
+    })
+
+    it('should setAll', function(){
+      var store = new Stoar({defs:{
+        flags: {
+          type: 'map',
+          value: {
+            foo:true
+          }
+        }
+      }})
+      store.setAll('flags', {bar:false,baz:true})
+      assert.deepEqual(store.getAll('flags'),{foo:true,bar:false,baz:true})
+    })
+
+    it('should change on setAll', function(done){
+      var store = new Stoar({defs:{
+        flags: {
+          type: 'map',
+          value: {
+            foo:true,
+            bar:false
+          }
+        }
+      }})
+      var pr = await('baz','bar').onkeep(function(){done()})
+      store.on('propChange',function(prop, ch){
+        assert.strictEqual(prop, 'flags')
+        if (ch.key === 'baz'){
+          assert.strictEqual(ch.oldVal, undefined)
+          assert.strictEqual(ch.newVal, true)
+          pr.keep('baz')
+        } else if (ch.key === 'bar'){
+          assert.strictEqual(ch.oldVal, false)
+          assert.strictEqual(ch.newVal, true)
+          pr.keep('bar')
+        } else {
+          done('bad key')
+        }
+      })
+      store.setAll('flags', {baz:true,bar:true})
+    })
+
+    it('should validate setAll', function(){
+      var store = new Stoar({
+        defs: { foo:{
+          type: 'map',
+          value: {a:1},
+          validate: function(val){
+            if (val < 0) throw 'bad'
+          }
+        }}
+      })
+      assert.throws(function(){
+        store.setAll('foo', {x:-1})
+      }, /bad/)
+    })
+
+    it('should resetAll', function(){
+      var store = new Stoar({defs:{
+        flags: {
+          type: 'map',
+          value: {
+            foo:true
+          }
+        }
+      }})
+      store.resetAll('flags', {bar:false,baz:true})
+      assert.deepEqual(store.getAll('flags'),{bar:false,baz:true})
+    })
+
+    it('should change on resetAll', function(done){
+      var store = new Stoar({defs:{
+        flags: {
+          type: 'map',
+          value: {
+            foo:true
+          }
+        }
+      }})
+      var pr = await('baz','foo').onkeep(function(){done()})
+      store.on('propChange',function(prop, ch){
+        assert.strictEqual(prop, 'flags')
+        if (ch.key === 'baz'){
+          assert.strictEqual(ch.oldVal, undefined)
+          assert.strictEqual(ch.newVal, true)
+          pr.keep('baz')
+        } else if (ch.key === 'foo'){
+          assert.strictEqual(ch.oldVal, true)
+          assert.strictEqual(ch.newVal, undefined)
+          pr.keep('foo')
+        } else {
+          done('bad key')
+        }
+      })
+      store.resetAll('flags', {baz:true})
+    })
+
+    it('should validate resetAll', function(){
+      var store = new Stoar({
+        defs: { foo:{
+          type: 'map',
+          value: {a:1},
+          validate: function(val){
+            if (val < 0) throw 'bad'
+          }
+        }}
+      })
+      assert.throws(function(){
+        store.resetAll('foo', {x:-1})
+      })
+    })
+
+    it('should clear', function(){
+      var store = new Stoar({defs:{
+        flags: {
+          type: 'map',
+          value: {
+            foo:true
+          }
+        }
+      }})
+      store.clear('flags')
+      assert.deepEqual(store.getAll('flags'),{})
+    })
+
+    it('should change on clear', function(done){
+      var store = new Stoar({defs:{
+        flags: {
+          type: 'map',
+          value: {
+            foo:true
+          }
+        }
+      }})
+      store.on('propChange',function(prop, ch){
+        assert.strictEqual(prop, 'flags')
+        assert.strictEqual(ch.key, 'foo')
+        assert.strictEqual(ch.oldVal, true)
+        assert.strictEqual(ch.newVal, undefined)
+        done()
+      })
+      store.clear('flags')
     })
   })
 })
@@ -1015,7 +1124,7 @@ describe('lists', function(){
     })
   })
 
-  describe('accessors', function(){
+  describe('mutators', function(){
 
     it('should set', function(){
       var st = new Stoar({defs:{
