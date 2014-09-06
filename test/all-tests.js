@@ -1134,6 +1134,20 @@ describe('lists', function(){
       assert.strictEqual(st.get('names',0),4)
     })
 
+    it('should change on set', function(done){
+      var st = new Stoar({defs:{
+        names: {type:'list',value:[]}
+      }})
+      st.on('propChange',function(prop,ch){
+        assert.strictEqual(prop,'names')
+        assert.strictEqual(ch.oldVal,undefined)
+        assert.strictEqual(ch.newVal,4)
+        assert.strictEqual(ch.index,0)
+        done()
+      })
+      st.set('names',0,4)
+    })
+
     it('should set validate', function(){
       var st = new Stoar({defs:{
         names: {type:'list',value:[],validate:function(x){if(!x)throw 'bad'}}
@@ -1150,6 +1164,19 @@ describe('lists', function(){
       }})
       st.resetAll('names',[3,4])
       assert.deepEqual(st.getAll('names'),[3,4])
+    })
+
+    it('should change on resetAll', function(){
+      var st = new Stoar({defs:{
+        names: {type:'list',value:[1,2]}
+      }})
+      var r = []
+      st.on('propChange',function(prop,ch){
+        assert.strictEqual(prop,'names')
+        r.push(ch.oldVal,ch.newVal,ch.index)
+      })
+      st.resetAll('names',[3])
+      assert.deepEqual(r,[1,3,0,2,undefined,1])
     })
 
     it('should resetAll validate', function(){
@@ -1170,12 +1197,38 @@ describe('lists', function(){
       assert.deepEqual(st.getAll('names'),[])
     })
 
+    it('should change on clear', function(){
+      var st = new Stoar({defs:{
+        names: {type:'list',value:[1,2]}
+      }})
+      var r = []
+      st.on('propChange',function(prop,ch){
+        assert.strictEqual(prop,'names')
+        r.push(ch.oldVal,ch.newVal,ch.index)
+      })
+      st.clear('names')
+      assert.deepEqual(r,[1,undefined,0,2,undefined,1])
+    })
+
     it('should push', function(){
       var st = new Stoar({defs:{
         names: {type:'list',value:[1]}
       }})
       st.push('names','d')
       assert.deepEqual(st.getAll('names'),[1,'d'])
+    })
+
+    it('should change on push', function(){
+      var st = new Stoar({defs:{
+        names: {type:'list',value:[1,2]}
+      }})
+      var r = []
+      st.on('propChange',function(prop,ch){
+        assert.strictEqual(prop,'names')
+        r.push(ch.oldVal,ch.newVal,ch.index)
+      })
+      st.push('names','d')
+      assert.deepEqual(r,[undefined,'d',2])
     })
 
     it('should push validate', function(){
@@ -1196,6 +1249,19 @@ describe('lists', function(){
       assert.deepEqual(st.getAll('names'),['d',1])
     })
 
+    it('should change on unshift', function(){
+      var st = new Stoar({defs:{
+        names: {type:'list',value:[1]}
+      }})
+      var r = []
+      st.on('propChange',function(prop,ch){
+        assert.strictEqual(prop,'names')
+        r.push(ch.oldVal,ch.newVal,ch.index)
+      })
+      st.unshift('names','d')
+      assert.deepEqual(r,[1,'d',0,undefined,1,1])
+    })
+
     it('should unshift validate', function(){
       var st = new Stoar({defs:{
         names: {type:'list',value:[],validate:function(x){if(!x)throw 'bad'}}
@@ -1214,12 +1280,38 @@ describe('lists', function(){
       assert.deepEqual(st.getAll('names'),[1])
     })
 
+    it('should change on pop', function(){
+      var st = new Stoar({defs:{
+        names: {type:'list',value:[1,2]}
+      }})
+      var r = []
+      st.on('propChange',function(prop,ch){
+        assert.strictEqual(prop,'names')
+        r.push(ch.oldVal,ch.newVal,ch.index)
+      })
+      st.pop('names')
+      assert.deepEqual(r,[2,undefined,1])
+    })
+
     it('should shift', function(){
       var st = new Stoar({defs:{
         names: {type:'list',value:[3,4]}
       }})
       assert.strictEqual(st.shift('names'),3)
       assert.deepEqual(st.getAll('names'),[4])
+    })
+
+    it('should change on shift', function(){
+      var st = new Stoar({defs:{
+        names: {type:'list',value:[1,2]}
+      }})
+      var r = []
+      st.on('propChange',function(prop,ch){
+        assert.strictEqual(prop,'names')
+        r.push(ch.oldVal,ch.newVal,ch.index)
+      })
+      st.shift('names')
+      assert.deepEqual(r,[1,2,0,2,undefined,1])
     })
   })
 })
