@@ -63,13 +63,25 @@ function getDefault(type){
 // ======================================================
 
 function Store(args){
-  EventEmitter.call(this);
+  EventEmitter.call(this)
   var defs = this._defs = {}
   _.each(args.data, function(val, prop){
     defs[prop] = makeDef(prop, {value:val})
   })
   _.each(args.defs, function(def, prop){
     defs[prop] = makeDef(prop, def)
+  })
+  _.each(_.keys(defs), function(prop){
+    var def = defs[prop]
+    if (def.loadable){
+      _.each([
+        prop+':loading',
+        prop+':status',
+        prop+':timestamp'
+      ], function(extraProp){
+        defs[extraProp] = makeDef(extraProp, {type:def.type})
+      })
+    }
   })
 }
 
