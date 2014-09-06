@@ -85,7 +85,7 @@ _.extend(Store.prototype, {
       throw new Error('cannot set a mutable value to itself')
     }
     if (!same || (isMut && allowMut)){
-      this.emit('propChange', change)
+      this.emit('propChange', def.prop, change)
       this.emit('change', def.prop, change.newVal, change.oldVal)
     }
   },
