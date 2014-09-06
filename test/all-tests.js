@@ -1069,6 +1069,14 @@ describe('lists', function(){
     assert.strictEqual(st.shift('names'),3)
     assert.deepEqual(st.getAll('names'),[4])
   })
+
+  it('should validate on start', function(){
+    assert.throws(function(){
+      var st = new Stoar({defs:{
+        names: {type:'list',value:[false],validate:function(x){if(!x)throw 'bad'}}
+      }})
+    },/bad/)
+  })
 })
 
 
