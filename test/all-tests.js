@@ -430,3 +430,652 @@ describe('stoar', function(){
   });
 });
 
+describe('items', function(){
+
+  it('should get', function(){
+    var store = new Stoar({
+      data: { foo:'bar' }
+    })
+    assert.strictEqual(store.get('foo'), 'bar')
+  })
+
+  it('should clone', function(){
+    var obj = {blah:3}
+    var store = new Stoar({
+      data: { foo:obj }
+    })
+    var obj2 = store.clone('foo')
+    assert.ok(obj !== obj2)
+    assert.deepEqual(obj, obj2)
+  })
+
+  it('should shallow clone', function(){
+    var obj = {blah:{blah:2}}
+    var store = new Stoar({
+      data: { foo:obj }
+    })
+    var obj2 = store.clone('foo')
+    assert.ok(obj !== obj2)
+    assert.ok(obj.blah === obj2.blah)
+    assert.deepEqual(obj, obj2)
+  })
+
+  it('should deep clone', function(){
+    var obj = {blah:{blah:2}}
+    var store = new Stoar({
+      data: { foo:obj }
+    })
+    var obj2 = store.clone('foo', true)
+    assert.ok(obj !== obj2)
+    assert.ok(obj.blah !== obj2.blah)
+    assert.deepEqual(obj, obj2)
+  })
+
+  it('should set', function(){
+    var store = new Stoar({
+      data: { foo:'bar' }
+    })
+    store.set('foo', 'baz')
+    assert.strictEqual(store.get('foo'), 'baz')
+  })
+
+  it('should set', function(){
+    var store = new Stoar({
+      data: { foo:'bar' }
+    })
+    store.set('foo', 'baz')
+    assert.strictEqual(store.get('foo'), 'baz')
+  })
+
+  it('should unset', function(){
+    var store = new Stoar({
+      data: { foo:'bar' }
+    })
+    assert.strictEqual(store.get('foo'), 'bar')
+    store.unset('foo')
+    assert.strictEqual(store.get('foo'), undefined)
+  })
+
+  it('should validate on set', function(){
+    var store = new Stoar({
+      defs: { count:{
+        value: 0,
+        validate: function(count){
+          if (count < 0) throw 'bad'
+        }
+      }}
+    })
+    store.set('count', 1)
+    assert.throws(function(){
+      store.set('count', -1)
+    }, /bad/)
+  })
+
+  it('should validate at start', function(){
+    assert.throws(function(){
+      var store = new Stoar({
+        defs: { count:{
+          value: -1,
+          validate: function(count){
+            if (count < 0) throw 'bad'
+          }
+        }}
+      })
+    }, /bad/)
+  })
+})
+
+describe('maps', function(){
+
+  it('should get', function(){
+    var store = new Stoar({
+      defs: { foo:{
+        type: 'map',
+        value: {a:1}
+      }}
+    })
+    assert.strictEqual(store.get('foo', 'a'), 1)
+  })
+
+  it('should get undefined', function(){
+    var store = new Stoar({
+      defs: { foo:{
+        type: 'map',
+        value: {a:1}
+      }}
+    })
+    assert.strictEqual(store.get('foo', 'b'), undefined)
+  })
+
+  it('should clone', function(){
+    var obj = {blah:3}
+    var store = new Stoar({
+      defs: { foo:{
+        type: 'map',
+        value: {a:obj}
+      }}
+    })
+    var obj2 = store.clone('foo', 'a')
+    assert.ok(obj !== obj2)
+    assert.deepEqual(obj, obj2)
+  })
+
+  it('should clone undefined', function(){
+    var store = new Stoar({
+      defs: { foo:{
+        type: 'map',
+        value: {}
+      }}
+    })
+    var obj = store.clone('foo', 'a')
+    assert.deepEqual(obj, undefined)
+  })
+
+  it('should clone null', function(){
+    var store = new Stoar({
+      defs: { foo:{
+        type: 'map',
+        value: {a:null}
+      }}
+    })
+    var obj = store.clone('foo', 'a')
+    assert.deepEqual(obj, null)
+  })
+
+  it('should shallow clone', function(){
+    var obj = {blah:{blah:2}}
+    var store = new Stoar({
+      defs: { foo:{
+        type: 'map',
+        value: {a:obj}
+      }}
+    })
+    var obj2 = store.clone('foo', 'a')
+    assert.ok(obj !== obj2)
+    assert.ok(obj.blah === obj2.blah)
+    assert.deepEqual(obj, obj2)
+  })
+
+  it('should deep clone', function(){
+    var obj = {blah:{blah:2}}
+    var store = new Stoar({
+      defs: { foo:{
+        type: 'map',
+        value: {a:obj}
+      }}
+    })
+    var obj2 = store.clone('foo', 'a', true)
+    assert.ok(obj !== obj2)
+    assert.ok(obj.blah !== obj2.blah)
+    assert.deepEqual(obj, obj2)
+  })
+
+  it('should set', function(){
+    var store = new Stoar({
+      defs: { foo:{
+        type: 'map',
+        value: {a:1}
+      }}
+    })
+    store.set('foo', 'a', 2)
+    assert.strictEqual(store.get('foo', 'a'), 2)
+  })
+
+  it('should validate set', function(){
+    var store = new Stoar({
+      defs: { foo:{
+        type: 'map',
+        value: {a:1},
+        validate: function(val){
+          if (val < 0) throw 'bad'
+        }
+      }}
+    })
+    assert.throws(function(){
+      store.set('foo', 'a', -1)
+    }, /bad/)
+  })
+
+  it('should unset', function(){
+    var store = new Stoar({
+      defs: { foo:{
+        type: 'map',
+        value: {a:1}
+      }}
+    })
+    assert.ok(store.has('foo','a'))
+    store.unset('foo', 'a')
+    assert.strictEqual(store.get('foo','a'), undefined)
+    assert.ok(!store.has('foo','a'))
+  })
+
+  it('should getAll', function(){
+    var store = new Stoar({defs:{
+      flags: {
+        type: 'map',
+        value: {
+          foo:true
+        }
+      }
+    }})
+    assert.deepEqual(store.getAll('flags'),{foo:true})
+  })
+
+  it('getAll should copy', function(){
+    var flags = {foo:true}
+    var store = new Stoar({defs:{
+      flags: {
+        type: 'map',
+        value: flags
+      }
+    }})
+    var flags2 = store.getAll('flags')
+    assert.deepEqual(flags,flags2)
+    assert.ok(flags !== flags2)
+  })
+
+  it('should setAll', function(){
+    var store = new Stoar({defs:{
+      flags: {
+        type: 'map',
+        value: {
+          foo:true
+        }
+      }
+    }})
+    store.setAll('flags', {bar:false,baz:true})
+    assert.deepEqual(store.getAll('flags'),{foo:true,bar:false,baz:true})
+  })
+
+  it('should validate setAll', function(){
+    var store = new Stoar({
+      defs: { foo:{
+        type: 'map',
+        value: {a:1},
+        validate: function(val){
+          if (val < 0) throw 'bad'
+        }
+      }}
+    })
+    assert.throws(function(){
+      store.setAll('foo', {x:-1})
+    }, /bad/)
+  })
+
+  it('should resetAll', function(){
+    var store = new Stoar({defs:{
+      flags: {
+        type: 'map',
+        value: {
+          foo:true
+        }
+      }
+    }})
+    store.resetAll('flags', {bar:false,baz:true})
+    assert.deepEqual(store.getAll('flags'),{bar:false,baz:true})
+  })
+
+  it('should validate resetAll', function(){
+    var store = new Stoar({
+      defs: { foo:{
+        type: 'map',
+        value: {a:1},
+        validate: function(val){
+          if (val < 0) throw 'bad'
+        }
+      }}
+    })
+    assert.throws(function(){
+      store.resetAll('foo', {x:-1})
+    })
+  })
+
+  it('should clear', function(){
+    var store = new Stoar({defs:{
+      flags: {
+        type: 'map',
+        value: {
+          foo:true
+        }
+      }
+    }})
+    store.clear('flags')
+    assert.deepEqual(store.getAll('flags'),{})
+  })
+
+  it('should has', function(){
+    var store = new Stoar({defs:{
+      flags: {
+        type: 'map',
+        value: {
+          foo:true,
+          baz:undefined
+        }
+      }
+    }})
+    assert.ok(store.has('flags','foo'))
+    assert.ok(!store.has('flags','bar'))
+    assert.ok(store.has('flags','baz'))
+  })
+
+  it('should keys', function(){
+    var store = new Stoar({defs:{
+      flags: {
+        type: 'map',
+        value: {
+          foo:true,
+          bar:false
+        }
+      }
+    }})
+    assert.deepEqual(store.keys('flags'),['foo','bar'])
+  })
+
+  it('should values', function(){
+    var store = new Stoar({defs:{
+      flags: {
+        type: 'map',
+        value: {
+          foo:true,
+          bar:false
+        }
+      }
+    }})
+    assert.deepEqual(store.values('flags'),[true,false])
+  })
+
+  it('should forEach', function(){
+    var store = new Stoar({defs:{
+      flags: {
+        type: 'map',
+        value: {
+          foo:true,
+          bar:false
+        }
+      }
+    }})
+    var count = 0
+    store.forEach('flags',function(val, key){
+      if (count === 0){
+        assert.strictEqual(val, true)
+        assert.strictEqual(key, 'foo')
+      } else if (count === 1){
+        assert.strictEqual(val, false)
+        assert.strictEqual(key, 'bar')
+      }
+      count++
+    })
+    assert.strictEqual(count, 2)
+  })
+
+  it('should forEach with ctx', function(){
+    var store = new Stoar({defs:{
+      flags: {
+        type: 'map',
+        value: {
+          bar:false
+        }
+      }
+    }})
+    var that = {}
+    store.forEach('flags',function(val, key){
+      assert.strictEqual(that, this)
+    }, that)
+  })
+
+  it('should validate at start', function(){
+    assert.throws(function(){
+      var store = new Stoar({
+        defs: { counts:{
+          type: 'map',
+          value: {a:-1},
+          validate: function(count){
+            if (count < 0) throw new Error('bad')
+          }
+        }}
+      })
+    })
+  })
+})
+
+describe('lists', function(){
+
+  it('should get', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:['zz']}
+    }})
+    assert.strictEqual(st.get('names', 0), 'zz')
+  })
+
+  it('should get undefined', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[]}
+    }})
+    assert.strictEqual(st.get('names', 0), undefined)
+  })
+
+  it('should clone', function(){
+    var ob1 = {x:1}
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[ob1]}
+    }})
+    var ob2 = st.clone('names',0)
+    assert.deepEqual(ob1,ob2)
+    assert.ok(ob1!==ob2)
+  })
+
+  it('should length', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[1,2,3]}
+    }})
+    assert.strictEqual(st.length('names'),3)
+  })
+
+  it('should getAll', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[2,3,4]}
+    }})
+    assert.deepEqual(st.getAll('names'),[2,3,4])
+  })
+
+  it('should getAll copy', function(){
+    var names1 = [3,4,5]
+    var st = new Stoar({defs:{
+      names: {type:'list',value:names1}
+    }})
+    var names2 = st.getAll('names')
+    assert.deepEqual(names1,names2)
+    assert.ok(names1!==names2)
+  })
+
+  it('should filter', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[1,2,3,4]}
+    }})
+    var odds = st.filter('names',function(x){
+      return x%2
+    })
+    assert.deepEqual(odds,[1,3])
+  })
+
+  it('should filter with context', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[1,2,3,4]}
+    }})
+    var that = {}
+    var odds = st.filter('names',function(x){
+      assert.strictEqual(that,this)
+    }, that)
+  })
+
+  it('should map', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[0,1,2]}
+    }})
+    var dubs = st.map('names',function(x){
+      return x*2
+    })
+    assert.deepEqual(dubs,[0,2,4])
+  })
+
+  it('should some', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[true,false]}
+    }})
+    assert.strictEqual(st.some('names',function(x){return x}),true)
+  })
+
+  it('should some false', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[false,false]}
+    }})
+    assert.strictEqual(st.some('names',function(x){return x}),false)
+  })
+
+  it('should every', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[true,true]}
+    }})
+    assert.strictEqual(st.every('names',function(x){return x}),true)
+  })
+
+  it('should every false', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[true,false]}
+    }})
+    assert.strictEqual(st.every('names',function(x){return x}),false)
+  })
+
+  it('should join', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[1,2,3]}
+    }})
+    assert.strictEqual(st.join('names','-'),'1-2-3')
+  })
+
+  it('should slice', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[6,7,8]}
+    }})
+    assert.deepEqual(st.slice('names'),st.getAll('names'))
+  })
+
+  it('should concat', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[2,3,4]}
+    }})
+    assert.deepEqual(st.concat('names', [5,6]),[2,3,4,5,6])
+  })
+
+  it('should indexOf', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[4,3,2]}
+    }})
+    assert.strictEqual(st.indexOf('names',3), 1)
+  })
+
+  it('should set', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[]}
+    }})
+    st.set('names',0,4)
+    assert.strictEqual(st.get('names',0),4)
+  })
+
+  it('should set validate', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[],validate:function(x){if(!x)throw 'bad'}}
+    }})
+    st.set('names',0,true)
+    assert.throws(function(){
+      st.set('names',0,false)
+    },/bad/)
+  })
+
+  it('should resetAll', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[1,2]}
+    }})
+    st.resetAll('names',[3,4])
+    assert.deepEqual(st.getAll('names'),[3,4])
+  })
+
+  it('should resetAll validate', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[],validate:function(x){if(!x)throw 'bad'}}
+    }})
+    st.resetAll('names',[3,4])
+    assert.throws(function(){
+      st.resetAll('names',[3,false])
+    },/bad/)
+  })
+
+  it('should clear', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[2,3,4]}
+    }})
+    st.clear('names')
+    assert.deepEqual(st.getAll('names'),[])
+  })
+
+  it('should push', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[1]}
+    }})
+    st.push('names','d')
+    assert.deepEqual(st.getAll('names'),[1,'d'])
+  })
+
+  it('should push validate', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[],validate:function(x){if(!x)throw 'bad'}}
+    }})
+    st.push('names','d')
+    assert.throws(function(){
+      st.push('names',false)
+    },/bad/)
+  })
+
+  it('should unshift', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[1]}
+    }})
+    st.unshift('names','d')
+    assert.deepEqual(st.getAll('names'),['d',1])
+  })
+
+  it('should unshift validate', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[],validate:function(x){if(!x)throw 'bad'}}
+    }})
+    st.unshift('names','d')
+    assert.throws(function(){
+      st.unshift('names',false)
+    },/bad/)
+  })
+
+  it('should pop', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[1,2]}
+    }})
+    assert.strictEqual(st.pop('names'),2)
+    assert.deepEqual(st.getAll('names'),[1])
+  })
+
+  it('should shift', function(){
+    var st = new Stoar({defs:{
+      names: {type:'list',value:[3,4]}
+    }})
+    assert.strictEqual(st.shift('names'),3)
+    assert.deepEqual(st.getAll('names'),[4])
+  })
+})
+
+
+
+
+
+
+
+
+

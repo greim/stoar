@@ -39,7 +39,13 @@ var makeDef = (function(){
       throw new Error(util.format('invalid type: %s', def.type))
     }
     def.prop = prop
-    def.validate(def.value)
+    if (def.type === 'item'){
+      def.validate(def.value)
+    } else {
+      _.each(def.value, function(val){
+        def.validate(val)
+      })
+    }
     return def
   }
 })()
