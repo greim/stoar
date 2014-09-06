@@ -498,6 +498,15 @@ describe('items', function(){
       assert.strictEqual(store.get('foo'), 'baz')
     })
 
+    it('should not set unknown prop', function(){
+      var store = new Stoar({
+        data: { foo:'bar' }
+      })
+      assert.throws(function(){
+        store.set('x', 'baz')
+      })
+    })
+
     it('should change on set', function(done){
       var store = new Stoar({
         data: { foo:'bar' }
@@ -1315,6 +1324,121 @@ describe('lists', function(){
     })
   })
 })
+
+describe('immutable', function(){
+
+  it('should not set mutable to self', function(){
+    var obj = {}
+    var store = new Stoar({
+      data: {foo:obj}
+    })
+    assert.throws(function(){
+      store.set('foo',obj)
+    })
+  })
+
+  it('should not change on immutable sameness', function(){
+    var store = new Stoar({
+      data: {foo:'w'}
+    })
+    store.on('propChange', function(){
+      assert.ok(false)
+    })
+    store.set('foo','w')
+  })
+
+  it('should not change on immutable sameness null', function(){
+    var store = new Stoar({
+      data: {foo:null}
+    })
+    store.on('propChange', function(){
+      assert.ok(false)
+    })
+    store.set('foo',null)
+  })
+
+  it('should not change on immutable sameness undefined', function(){
+    var store = new Stoar({
+      data: {foo:undefined}
+    })
+    store.on('propChange', function(){
+      assert.ok(false)
+    })
+    store.set('foo',undefined)
+  })
+
+  it('should not change on immutable sameness function', function(){
+    var fn = function(){}
+    var store = new Stoar({
+      data: {foo:fn}
+    })
+    store.on('propChange', function(){
+      assert.ok(false)
+    })
+    store.set('foo',fn)
+  })
+})
+
+describe('loadables', function(){
+
+  it('should allow loadable', function(){
+    var store = new Stoar({
+      defs: {
+        foo: {
+          type: 'item',
+          value: 4,
+          loadable: true
+        }
+      }
+    })
+  })
+
+  it('should allow loadable :loading', function(){
+    var store = new Stoar({
+      defs: {
+        foo: {
+          type: 'item',
+          value: 4,
+          loadable: true
+        }
+      }
+    })
+    store.set('foo:loading', true)
+    assert.strictEqual(store.get('foo:loading'), true)
+  })
+
+  it('should allow loadable :status', function(){
+    var store = new Stoar({
+      defs: {
+        foo: {
+          type: 'item',
+          value: 4,
+          loadable: true
+        }
+      }
+    })
+    store.set('foo:status', 'currently loading')
+    assert.strictEqual(store.get('foo:status'), 'currently loading')
+  })
+
+  it('should allow loadable :timestamp', function(){
+    var store = new Stoar({
+      defs: {
+        foo: {
+          type: 'item',
+          value: 4,
+          loadable: true
+        }
+      }
+    })
+    var time = Date.now()
+    store.set('foo:timestamp', time)
+    assert.strictEqual(store.get('foo:timestamp'), time)
+  })
+})
+
+
+
 
 
 
