@@ -2,7 +2,7 @@
 
 Note: this library is still experimental.
 
-A [Flux](http://facebook.github.io/react/docs/flux-overview.html) data store.
+A client side data store intended for use in a [Flux](http://facebook.github.io/react/docs/flux-overview.html) architecture.
 This is not a complete Flux implementation, just the store part.
 This lib makes very few assumptions or opinions about your overall Flux app structure.
 
@@ -40,14 +40,14 @@ store.forEach('foods', function(food){
 Each data item receives a definition, which is an object with `type`, `value` and `validate` properties.
 
   * **type** - Possible values include: `item`, `map`, and `list`. Optional; defaults to `item`. The `type` determines what kinds of operations are available on this store property.
-  * **value** - The initial value of this property in the store. If `type === 'map`, this must be a plain object. If `type === ''list'`, this must be an array. This is optional, with a default value depending on `type`.
+  * **value** - The initial content of this property in the store. If `type === 'map`, this must be a plain object. If `type === 'list'`, this must be an array. This is optional, with a default value depending on `type`.
   * **validate** - An optional function that runs against every value set on this store property. For `map` and `list` types, this runs against every item in that map or list. It should throw for bad values. The return value is discarded.
+  * **loadable** - Indicates that this property is associated with a remote data source. Setting this to `true` causes some extra properties to be added. For example if the property is called `posts`, properties called `posts:loading`, `posts:status`, and `posts:timestamp` will be created too, each with a corresponding `type`. It's up to you how to use these extra properties.
 
 ## Immutability and Cloning
 
 JS objects aren't immutable, but treating them as such makes many things easier.
 Thus, stoar rejects resetting a mutable property to itself, and provides a `clone()` method that you can use instead of `get()` in order to treat objects as immutable.
-(Note: cloning internally uses lodash's clone methods.)
 
 ```js
 var store = new Stoar({
@@ -111,8 +111,8 @@ var deepClone = store.clone('stuff', true);
  * `store.length(prop)` - Returns the length.
  * `store.getAll(prop)` - Returns a copy of the list. Modifying the copy will not change the list.
 
-All of these are strictly accessors and apply directly into the corresponding `Array.prototype` method, with `prop` shifted off the args.
-In old browsers you must polyfill these on `Array.prototype` before calling them.
+All of these are strictly accessors and call directly into the `Array.prototype` method of the same name, but with `prop` shifted off the args.
+In old browsers you may need to polyfill `Array.prototype` in order for these to work.
 
  * `store.filter(prop, ...)`
  * `store.map(prop, ...)`
