@@ -214,6 +214,20 @@ _.extend(EmitterContext.prototype, {
 
 function Dispatcher(){
   this._jobs = []
+  this._notifiers = []
+  var self = this
+    ,deferred = false
+  this._propChange = function(store, prop, change){
+    if (!deferred){
+      deferred = true
+      _.defer(function(){
+        deferred = false
+        for (var i=0; i<self._notifiers.length; i++){
+          self._notifiers[i].emit('change')
+        }
+      })
+    }
+  }
 }
 
 _.extend(Dispatcher.prototype, {
@@ -228,6 +242,7 @@ _.extend(Dispatcher.prototype, {
 
   notifier: function(){
     var notifier = new Notifier()
+    this._notifiers.push(notifier)
     return notifier
   },
 
@@ -242,6 +257,9 @@ _.extend(Dispatcher.prototype, {
       store: store,
       callback: callback
     })
+    store.on('propChange', _.bind(function(prop, change){
+      this._propChange(store, prop, change)
+    }, this))
   },
 
   waitFor: function(store){
@@ -263,7 +281,6 @@ _.extend(Dispatcher.prototype, {
       var job = this._jobs[i]
       this._run(job)
     }
-    delete this._jobs
     delete this._action
     delete this._payload
     delete this._running
