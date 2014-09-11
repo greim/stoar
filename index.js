@@ -233,6 +233,10 @@ function Dispatcher(){
 _.extend(Dispatcher.prototype, {
 
   commander: function(methods){
+    if (this._createdCommander){
+      throw new Error('a dispatcher cant create two commanders')
+    }
+    this._createdCommander = true
     var commander = new Commander(methods)
     commander.on('action', _.bind(function(action, payload){
       this._send(action, payload)
@@ -241,6 +245,10 @@ _.extend(Dispatcher.prototype, {
   },
 
   notifier: function(){
+    if (this._createdNotifier){
+      throw new Error('a dispatcher cant create two commanders')
+    }
+    this._createdNotifier = true
     var notifier = new Notifier()
     this._notifiers.push(notifier)
     return notifier

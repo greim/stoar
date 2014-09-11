@@ -16,6 +16,14 @@ describe('dispatcher', function(){
     assert.ok(cdr)
   })
 
+  it('should not work twice', function(){
+    var dsp = Stoar.dispatcher()
+    var cdr1 = dsp.commander()
+    assert.throws(function(){
+      var cdr2 = dsp.commander()
+    })
+  })
+
   it('should send', function(done){
     var dsp = Stoar.dispatcher()
     var cdr = dsp.commander()

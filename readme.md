@@ -2,9 +2,13 @@
 
 Note: this library is still experimental.
 
-A client side data store intended for use in a [Flux](http://facebook.github.io/react/docs/flux-overview.html) architecture.
-This is not a complete Flux implementation, just the store part.
-This lib makes very few assumptions or opinions about your overall Flux app structure.
+A set of tools for the [Flux](http://facebook.github.io/react/docs/flux-overview.html) architecture.
+It provides you with:
+
+ * **Data store** -- A container for application state.
+ * **Dispatcher** -- An object that mediates data flow into your stores.
+ * **Commander** -- The entry point where data flows into the dispatcher.
+ * **Notifier** -- The exit point where data flows out of the dispatcher.
 
 ```sh
 % npm install stoar
@@ -14,10 +18,38 @@ This lib makes very few assumptions or opinions about your overall Flux app stru
 var Stoar = require('stoar');
 ```
 
-How to make a Stoar.
+## Building a basic Flux app
 
 ```js
-var store = new Stoar({
+var dispatcher = Stoar.dispatcher();
+var uiStore = Stoar.store({...});
+dispatcher.registerStore(uiStore, function(action, payload){
+  // respond to the action by mutating uiStore
+});
+var dataStore = Stoar.store({...});
+dispatcher.registerStore(dataStore, function(action, payload){
+  this.waitFor(uiStore);
+  // respond to the action while being able
+  // to see the latest data in uiStore
+});
+var commander = dispatcher.commander({
+  doCustomThing: function(){}
+});
+commander.send(action, payload); // send an action to dispatcher
+commander.doCustomThing(); // custom method might have side effects
+var notifier = dispatcher.notifier();
+notifier.on('change', function(){
+  // Debounced change notifier
+  // fires asynchronously after
+  // N synchronous update cycles
+  topLevelComponent.setProps(...)
+});
+```
+
+## Stores
+
+```js
+var store = Stoar.store({
   defs: {
     count: {
       type: 'item',
@@ -74,6 +106,13 @@ var deepClone = store.clone('stuff', true);
 ```
 
 ## API
+
+### Stoar singleton API
+
+ * `var store = Stoar.store()` - Create a data store.
+ * `var disp = Stoar.dispatcher()` - Create a dispatcher.
+ * `var commander = disp.commander()` - Create a commander from the dispatcher. You can only create one commander from a dispatcher.
+ * `var notifier = disp.notifier()` - Create a notifier from the dispatcher. You can only create one notifier from a dispatcher.
 
 ### Items
 

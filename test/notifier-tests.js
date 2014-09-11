@@ -16,6 +16,14 @@ describe('dispatcher', function(){
     assert.ok(not)
   })
 
+  it('should not work twice', function(){
+    var dsp = Stoar.dispatcher()
+    var not1 = dsp.notifier()
+    assert.throws(function(){
+      var not2 = dsp.notifier()
+    })
+  })
+
   it('should notify', function(done){
     var dsp = Stoar.dispatcher()
     var cmd = dsp.commander()
