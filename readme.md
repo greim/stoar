@@ -86,7 +86,7 @@ commander.doCustomThing(); // custom method might have side effects
 ...
 ```
 
-## Stores
+## Stores. How do they work?
 
 ```js
 var store = Stoar.store({

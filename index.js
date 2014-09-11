@@ -4,7 +4,8 @@ var _ = require('lodash')
   ,itemFuncs = require('./lib/item-functions')
   ,mapFuncs = require('./lib/map-functions')
   ,listFuncs = require('./lib/list-functions')
-  ,funcNames = _.keys(_.extend({}, itemFuncs, mapFuncs, listFuncs))
+  ,accFuncNames = _.keys(_.extend({}, itemFuncs.accessors, mapFuncs.accessors, listFuncs.accessors))
+  ,mutFuncNames = _.keys(_.extend({}, itemFuncs.mutators, mapFuncs.mutators, listFuncs.mutators))
   ,funcsByType = {item:itemFuncs,map:mapFuncs,list:listFuncs}
 
 // ======================================================
@@ -111,14 +112,35 @@ _.extend(Stoar.prototype, {
   }
 })
 
-_.each(funcNames, function(funcName){
+_.each(accFuncNames, function(funcName){
   Stoar.prototype[funcName] = function(prop){
     if (!this._defs.hasOwnProperty(prop)){
       throw new Error(util.format('no property in store: %s', prop))
     }
     var def = this._defs[prop]
       ,type = def.type
-      ,funcs = funcsByType[type]
+      ,funcs = funcsByType[type].accessors
+    if (!funcs){
+      throw new Error(util.format('no such method for %s types', type))
+    } else {
+      var args = Array.prototype.slice.call(arguments)
+      args[0] = def
+      return funcs[funcName].apply(this, args)
+    }
+  }
+})
+
+_.each(mutFuncNames, function(funcName){
+  Stoar.prototype[funcName] = function(prop){
+    if (!this._defs.hasOwnProperty(prop)){
+      throw new Error(util.format('no property in store: %s', prop))
+    }
+    if (this._locked){
+      throw new Error('cannot mutate the store outside a dispatcher cycle')
+    }
+    var def = this._defs[prop]
+      ,type = def.type
+      ,funcs = funcsByType[type].mutators
     if (!funcs){
       throw new Error(util.format('no such method for %s types', type))
     } else {
@@ -268,6 +290,7 @@ _.extend(Dispatcher.prototype, {
     store.on('propChange', _.bind(function(prop, change){
       this._propChange(store, prop, change)
     }, this))
+    store._locked = true
   },
 
   waitFor: function(store){
@@ -301,7 +324,9 @@ _.extend(Dispatcher.prototype, {
     }
     if (!this._ran[job.name]){
       this._running[job.name] = true
+      job.store._locked = false
       job.callback.call(this, this._action, this._payload)
+      job.store._locked = true
       delete this._running[job.name]
     }
     this._ran[job.name] = true
