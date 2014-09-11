@@ -11,21 +11,21 @@ var Stoar = require('../index');
 describe('stoar', function(){
 
   it('should construct with data', function(){
-    new Stoar({data:{}});
+    Stoar.store({data:{}});
   });
 
   it('should construct with defs', function(){
-    new Stoar({defs:{}});
+    Stoar.store({defs:{}});
   });
 
   it('should get data', function(){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     assert.strictEqual(store.get('foo'), null);
   });
 
   it('should clone', function(){
     var foo = {bar:'a'};
-    var store = new Stoar({data:{foo:foo}});
+    var store = Stoar.store({data:{foo:foo}});
     var clonedFoo = store.clone('foo');
     assert.deepEqual(foo, clonedFoo);
     assert.ok(foo !== clonedFoo);
@@ -33,7 +33,7 @@ describe('stoar', function(){
 
   it('should shallow clone', function(){
     var foo = {bar:{bar:'baz'}};
-    var store = new Stoar({data:{foo:foo}});
+    var store = Stoar.store({data:{foo:foo}});
     var clonedFoo = store.clone('foo');
     assert.deepEqual(foo, clonedFoo);
     assert.ok(foo !== clonedFoo);
@@ -42,7 +42,7 @@ describe('stoar', function(){
 
   it('should deep clone', function(){
     var foo = {bar:{baz:'a'}};
-    var store = new Stoar({data:{foo:foo}});
+    var store = Stoar.store({data:{foo:foo}});
     var clonedFoo = store.clone('foo', true);
     assert.deepEqual(foo, clonedFoo);
     assert.ok(foo.bar !== clonedFoo.bar);
@@ -51,27 +51,27 @@ describe('stoar', function(){
   it('deep cloning should allow non-json types', function(){
     var func = function(){}
     var foo = {bar:{baz:func}};
-    var store = new Stoar({data:{foo:foo}});
+    var store = Stoar.store({data:{foo:foo}});
     var clonedFoo = store.clone('foo', true);
     assert.deepEqual(foo, clonedFoo);
     assert.strictEqual(func, clonedFoo.bar.baz);
   });
 
   it('clone doesnt break on immutables', function(){
-    var store = new Stoar({data:{foo:'foo'}});
+    var store = Stoar.store({data:{foo:'foo'}});
     var clonedFoo = store.clone('foo');
     assert.strictEqual('foo', clonedFoo);
   });
 
   it('deep clone doesnt break on immutables', function(){
-    var store = new Stoar({data:{foo:'foo'}});
+    var store = Stoar.store({data:{foo:'foo'}});
     var clonedFoo = store.clone('foo', true);
     assert.strictEqual('foo', clonedFoo);
   });
 
   it('should clone arrays', function(){
     var foo = ['a','b','c'];
-    var store = new Stoar({data:{foo:foo}});
+    var store = Stoar.store({data:{foo:foo}});
     var clonedFoo = store.clone('foo');
     assert.deepEqual(foo, clonedFoo);
     assert.ok(foo !== clonedFoo);
@@ -79,7 +79,7 @@ describe('stoar', function(){
 
   it('should shallow clone arrays', function(){
     var foo = ['a','b',{x:'y'}];
-    var store = new Stoar({data:{foo:foo}});
+    var store = Stoar.store({data:{foo:foo}});
     var clonedFoo = store.clone('foo');
     assert.deepEqual(foo, clonedFoo);
     assert.ok(foo[2] === clonedFoo[2]);
@@ -87,7 +87,7 @@ describe('stoar', function(){
 
   it('should deep clone arrays', function(){
     var foo = ['a','b',{x:'y'}];
-    var store = new Stoar({data:{foo:foo}});
+    var store = Stoar.store({data:{foo:foo}});
     var clonedFoo = store.clone('foo', true);
     assert.deepEqual(foo, clonedFoo);
     assert.deepEqual(foo[2], clonedFoo[2]);
@@ -95,19 +95,19 @@ describe('stoar', function(){
   });
 
   it('should create a dispatcher', function(){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var dispatcher = store.dispatcher();
     assert.ok(dispatcher);
   });
 
   it('should create an emitter', function(){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var emitter = store.emitter();
     assert.ok(emitter);
   });
 
   it('should pass thru a command', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var dispatcher = store.dispatcher();
     var emitter = store.emitter();
     emitter.on('change:foo', function(value){
@@ -118,7 +118,7 @@ describe('stoar', function(){
   });
 
   it('should provide previous value', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var dispatcher = store.dispatcher();
     var emitter = store.emitter();
     emitter.on('change:foo', function(value, old){
@@ -129,7 +129,7 @@ describe('stoar', function(){
   });
 
   it('should update store on passing thru a command', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var dispatcher = store.dispatcher();
     var emitter = store.emitter();
     emitter.on('change:foo', function(value){
@@ -140,7 +140,7 @@ describe('stoar', function(){
   });
 
   it('emitter handler should make this be emitter', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var dispatcher = store.dispatcher();
     var emitter = store.emitter();
     emitter.on('change:foo', function(value){
@@ -151,7 +151,7 @@ describe('stoar', function(){
   });
 
   it('should handle a custom command', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var dispatcher = store.dispatcher({
       custom:function(val){
         this.store.set('foo', val)
@@ -166,7 +166,7 @@ describe('stoar', function(){
   });
 
   it('should receive a custom event', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var dispatcher = store.dispatcher();
     var emitter = store.emitter({
       'change:foo': function(value){
@@ -178,7 +178,7 @@ describe('stoar', function(){
   });
 
   it('should pass along a custom event', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var dispatcher = store.dispatcher();
     var emitter = store.emitter({
       'change:foo': function(value){
@@ -194,7 +194,7 @@ describe('stoar', function(){
 
   it('custom commands should precede default ones of same name', function(done){
     var aVal = '';
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var dispatcher = store.dispatcher({
       'change:foo': function(val){aVal += 'a';}
     });
@@ -209,7 +209,7 @@ describe('stoar', function(){
 
   it('dont block a default command if return undefined', function(done){
     var val = '';
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var emitter = store.emitter();
     var dispatcher = store.dispatcher({
       'change:foo': function(){
@@ -227,7 +227,7 @@ describe('stoar', function(){
 
   it('block a default command if return falsy', function(done){
     var val = '';
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var emitter = store.emitter();
     var dispatcher = store.dispatcher({
       'change:foo': function(){
@@ -246,7 +246,7 @@ describe('stoar', function(){
 
   it('dont block a default command if return truthy', function(done){
     var val = '';
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var emitter = store.emitter();
     var dispatcher = store.dispatcher({
       'change:foo': function(){
@@ -264,7 +264,7 @@ describe('stoar', function(){
   });
 
   it('dispatcher method should have this.store', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     store.dispatcher({
       foo: function(){
         assert.strictEqual(this.store, store);
@@ -274,7 +274,7 @@ describe('stoar', function(){
   });
 
   it('dispatcher method should receive all params', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     store.dispatcher({
       foo: function(a, b, c){
         assert.strictEqual(a, 1);
@@ -286,7 +286,7 @@ describe('stoar', function(){
   });
 
   it('emitter method should have this.store', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var emitter = store.emitter({
       'change:foo': function(){
         assert.strictEqual(this.store, store);
@@ -297,7 +297,7 @@ describe('stoar', function(){
   });
 
   it('dont block a default emit when return undefined', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var emitter = store.emitter({
       'change:foo': function(){}
     });
@@ -308,7 +308,7 @@ describe('stoar', function(){
   });
 
   it('dont block a default emit when return truthy', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var emitter = store.emitter({
       'change:foo': function(){
         return true;
@@ -321,7 +321,7 @@ describe('stoar', function(){
   });
 
   it('block a default emit when return falsy', function(done){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var emitter = store.emitter({
       'change:foo': function(){
         return false;
@@ -336,7 +336,7 @@ describe('stoar', function(){
 
   it('should handle bare change event', function(){
     var res = '';
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var emitter = store.emitter({
       'change': function(prop, val, old){
         res += 'a';
@@ -361,7 +361,7 @@ describe('stoar', function(){
   });
 
   it('returning false from change should prevent change:foo', function(){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var emitter = store.emitter({
       'change': function(){
         return false;
@@ -374,7 +374,7 @@ describe('stoar', function(){
   });
 
   it('should not emit when immutables are set to the same value', function(){
-    var store = new Stoar({data:{foo:1}});
+    var store = Stoar.store({data:{foo:1}});
     var emitter = store.emitter();
     emitter.on('change:foo', function(){
       throw new Error('change event on immutable sameness');
@@ -384,14 +384,14 @@ describe('stoar', function(){
 
   it('should throw when mutables are set to same value', function(){
     var obj = {}
-    var store = new Stoar({data:{foo:obj}});
+    var store = Stoar.store({data:{foo:obj}});
     assert.throws(function(){
       store.set('foo', obj);
     })
   });
 
   it('should not emit when null is set to null', function(){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var emitter = store.emitter();
     emitter.on('change:foo', function(){
       throw new Error('change event on null sameness');
@@ -400,7 +400,7 @@ describe('stoar', function(){
   });
 
   it('should not emit when undefined is set to undefined', function(){
-    var store = new Stoar({data:{foo:undefined}});
+    var store = Stoar.store({data:{foo:undefined}});
     var emitter = store.emitter();
     emitter.on('change:foo', function(){
       throw new Error('change event on undefined sameness');
@@ -409,7 +409,7 @@ describe('stoar', function(){
   });
 
   it('should emit when undefined is set to null', function(){
-    var store = new Stoar({data:{foo:undefined}});
+    var store = Stoar.store({data:{foo:undefined}});
     var emitter = store.emitter();
     var success = false;
     emitter.on('change:foo', function(){
@@ -420,7 +420,7 @@ describe('stoar', function(){
   });
 
   it('should emit when null is set to undefined', function(){
-    var store = new Stoar({data:{foo:null}});
+    var store = Stoar.store({data:{foo:null}});
     var emitter = store.emitter();
     var success = false;
     emitter.on('change:foo', function(){
@@ -435,7 +435,7 @@ describe('items', function(){
 
   it('should validate at start', function(){
     assert.throws(function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { count:{
           value: -1,
           validate: function(count){
@@ -449,7 +449,7 @@ describe('items', function(){
   describe('accessors', function(){
 
     it('should get', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         data: { foo:'bar' }
       })
       assert.strictEqual(store.get('foo'), 'bar')
@@ -457,7 +457,7 @@ describe('items', function(){
 
     it('should clone', function(){
       var obj = {blah:3}
-      var store = new Stoar({
+      var store = Stoar.store({
         data: { foo:obj }
       })
       var obj2 = store.clone('foo')
@@ -467,7 +467,7 @@ describe('items', function(){
 
     it('should shallow clone', function(){
       var obj = {blah:{blah:2}}
-      var store = new Stoar({
+      var store = Stoar.store({
         data: { foo:obj }
       })
       var obj2 = store.clone('foo')
@@ -478,7 +478,7 @@ describe('items', function(){
 
     it('should deep clone', function(){
       var obj = {blah:{blah:2}}
-      var store = new Stoar({
+      var store = Stoar.store({
         data: { foo:obj }
       })
       var obj2 = store.clone('foo', true)
@@ -491,7 +491,7 @@ describe('items', function(){
   describe('mutators', function(){
 
     it('should set', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         data: { foo:'bar' }
       })
       store.set('foo', 'baz')
@@ -499,7 +499,7 @@ describe('items', function(){
     })
 
     it('should not set unknown prop', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         data: { foo:'bar' }
       })
       assert.throws(function(){
@@ -508,7 +508,7 @@ describe('items', function(){
     })
 
     it('should change on set', function(done){
-      var store = new Stoar({
+      var store = Stoar.store({
         data: { foo:'bar' }
       })
       store.on('propChange', function(prop, change){
@@ -521,7 +521,7 @@ describe('items', function(){
     })
 
     it('should unset', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         data: { foo:'bar' }
       })
       assert.strictEqual(store.get('foo'), 'bar')
@@ -530,7 +530,7 @@ describe('items', function(){
     })
 
     it('should change on unset', function(done){
-      var store = new Stoar({
+      var store = Stoar.store({
         data: { foo:'bar' }
       })
       store.on('propChange', function(prop, change){
@@ -543,7 +543,7 @@ describe('items', function(){
     })
 
     it('should validate on set', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { count:{
           value: 0,
           validate: function(count){
@@ -563,7 +563,7 @@ describe('maps', function(){
 
   it('should validate at start', function(){
     assert.throws(function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { counts:{
           type: 'map',
           value: {a:-1},
@@ -578,7 +578,7 @@ describe('maps', function(){
   describe('accessors', function(){
 
     it('should get', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:1}
@@ -588,7 +588,7 @@ describe('maps', function(){
     })
 
     it('should get undefined', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:1}
@@ -599,7 +599,7 @@ describe('maps', function(){
 
     it('should clone', function(){
       var obj = {blah:3}
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:obj}
@@ -611,7 +611,7 @@ describe('maps', function(){
     })
 
     it('should clone undefined', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {}
@@ -622,7 +622,7 @@ describe('maps', function(){
     })
 
     it('should clone null', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:null}
@@ -634,7 +634,7 @@ describe('maps', function(){
 
     it('should shallow clone', function(){
       var obj = {blah:{blah:2}}
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:obj}
@@ -648,7 +648,7 @@ describe('maps', function(){
 
     it('should deep clone', function(){
       var obj = {blah:{blah:2}}
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:obj}
@@ -661,7 +661,7 @@ describe('maps', function(){
     })
 
     it('should getAll', function(){
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: {
@@ -674,7 +674,7 @@ describe('maps', function(){
 
     it('getAll should copy', function(){
       var flags = {foo:true}
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: flags
@@ -686,7 +686,7 @@ describe('maps', function(){
     })
 
     it('should has', function(){
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: {
@@ -701,7 +701,7 @@ describe('maps', function(){
     })
 
     it('should keys', function(){
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: {
@@ -714,7 +714,7 @@ describe('maps', function(){
     })
 
     it('should values', function(){
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: {
@@ -727,7 +727,7 @@ describe('maps', function(){
     })
 
     it('should forEach', function(){
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: {
@@ -751,7 +751,7 @@ describe('maps', function(){
     })
 
     it('should forEach with ctx', function(){
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: {
@@ -769,7 +769,7 @@ describe('maps', function(){
   describe('mutators', function(){
 
     it('should set', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:1}
@@ -780,7 +780,7 @@ describe('maps', function(){
     })
 
     it('should change on set', function(done){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:1}
@@ -797,7 +797,7 @@ describe('maps', function(){
     })
 
     it('should validate set', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:1},
@@ -812,7 +812,7 @@ describe('maps', function(){
     })
 
     it('should unset', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:1}
@@ -825,7 +825,7 @@ describe('maps', function(){
     })
 
     it('should change on unset', function(done){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:1}
@@ -842,7 +842,7 @@ describe('maps', function(){
     })
 
     it('should setAll', function(){
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: {
@@ -855,7 +855,7 @@ describe('maps', function(){
     })
 
     it('should change on setAll', function(done){
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: {
@@ -883,7 +883,7 @@ describe('maps', function(){
     })
 
     it('should validate setAll', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:1},
@@ -898,7 +898,7 @@ describe('maps', function(){
     })
 
     it('should resetAll', function(){
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: {
@@ -911,7 +911,7 @@ describe('maps', function(){
     })
 
     it('should change on resetAll', function(done){
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: {
@@ -938,7 +938,7 @@ describe('maps', function(){
     })
 
     it('should validate resetAll', function(){
-      var store = new Stoar({
+      var store = Stoar.store({
         defs: { foo:{
           type: 'map',
           value: {a:1},
@@ -953,7 +953,7 @@ describe('maps', function(){
     })
 
     it('should clear', function(){
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: {
@@ -966,7 +966,7 @@ describe('maps', function(){
     })
 
     it('should change on clear', function(done){
-      var store = new Stoar({defs:{
+      var store = Stoar.store({defs:{
         flags: {
           type: 'map',
           value: {
@@ -990,7 +990,7 @@ describe('lists', function(){
 
   it('should validate on start', function(){
     assert.throws(function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[false],validate:function(x){if(!x)throw 'bad'}}
       }})
     },/bad/)
@@ -999,14 +999,14 @@ describe('lists', function(){
   describe('accessors', function(){
 
     it('should get', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:['zz']}
       }})
       assert.strictEqual(st.get('names', 0), 'zz')
     })
 
     it('should get undefined', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[]}
       }})
       assert.strictEqual(st.get('names', 0), undefined)
@@ -1014,7 +1014,7 @@ describe('lists', function(){
 
     it('should clone', function(){
       var ob1 = {x:1}
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[ob1]}
       }})
       var ob2 = st.clone('names',0)
@@ -1023,14 +1023,14 @@ describe('lists', function(){
     })
 
     it('should length', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1,2,3]}
       }})
       assert.strictEqual(st.length('names'),3)
     })
 
     it('should getAll', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[2,3,4]}
       }})
       assert.deepEqual(st.getAll('names'),[2,3,4])
@@ -1038,7 +1038,7 @@ describe('lists', function(){
 
     it('should getAll copy', function(){
       var names1 = [3,4,5]
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:names1}
       }})
       var names2 = st.getAll('names')
@@ -1047,7 +1047,7 @@ describe('lists', function(){
     })
 
     it('should filter', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1,2,3,4]}
       }})
       var odds = st.filter('names',function(x){
@@ -1057,7 +1057,7 @@ describe('lists', function(){
     })
 
     it('should filter with context', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1,2,3,4]}
       }})
       var that = {}
@@ -1067,7 +1067,7 @@ describe('lists', function(){
     })
 
     it('should map', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[0,1,2]}
       }})
       var dubs = st.map('names',function(x){
@@ -1077,56 +1077,56 @@ describe('lists', function(){
     })
 
     it('should some', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[true,false]}
       }})
       assert.strictEqual(st.some('names',function(x){return x}),true)
     })
 
     it('should some false', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[false,false]}
       }})
       assert.strictEqual(st.some('names',function(x){return x}),false)
     })
 
     it('should every', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[true,true]}
       }})
       assert.strictEqual(st.every('names',function(x){return x}),true)
     })
 
     it('should every false', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[true,false]}
       }})
       assert.strictEqual(st.every('names',function(x){return x}),false)
     })
 
     it('should join', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1,2,3]}
       }})
       assert.strictEqual(st.join('names','-'),'1-2-3')
     })
 
     it('should slice', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[6,7,8]}
       }})
       assert.deepEqual(st.slice('names'),st.getAll('names'))
     })
 
     it('should concat', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[2,3,4]}
       }})
       assert.deepEqual(st.concat('names', [5,6]),[2,3,4,5,6])
     })
 
     it('should indexOf', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[4,3,2]}
       }})
       assert.strictEqual(st.indexOf('names',3), 1)
@@ -1136,7 +1136,7 @@ describe('lists', function(){
   describe('mutators', function(){
 
     it('should set', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[]}
       }})
       st.set('names',0,4)
@@ -1144,7 +1144,7 @@ describe('lists', function(){
     })
 
     it('should change on set', function(done){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[]}
       }})
       st.on('propChange',function(prop,ch){
@@ -1158,7 +1158,7 @@ describe('lists', function(){
     })
 
     it('should set validate', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[],validate:function(x){if(!x)throw 'bad'}}
       }})
       st.set('names',0,true)
@@ -1168,7 +1168,7 @@ describe('lists', function(){
     })
 
     it('should resetAll', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1,2]}
       }})
       st.resetAll('names',[3,4])
@@ -1176,7 +1176,7 @@ describe('lists', function(){
     })
 
     it('should change on resetAll', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1,2]}
       }})
       var r = []
@@ -1189,7 +1189,7 @@ describe('lists', function(){
     })
 
     it('should resetAll validate', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[],validate:function(x){if(!x)throw 'bad'}}
       }})
       st.resetAll('names',[3,4])
@@ -1199,7 +1199,7 @@ describe('lists', function(){
     })
 
     it('should clear', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[2,3,4]}
       }})
       st.clear('names')
@@ -1207,7 +1207,7 @@ describe('lists', function(){
     })
 
     it('should change on clear', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1,2]}
       }})
       var r = []
@@ -1220,7 +1220,7 @@ describe('lists', function(){
     })
 
     it('should push', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1]}
       }})
       st.push('names','d')
@@ -1228,7 +1228,7 @@ describe('lists', function(){
     })
 
     it('should change on push', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1,2]}
       }})
       var r = []
@@ -1241,7 +1241,7 @@ describe('lists', function(){
     })
 
     it('should push validate', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[],validate:function(x){if(!x)throw 'bad'}}
       }})
       st.push('names','d')
@@ -1251,7 +1251,7 @@ describe('lists', function(){
     })
 
     it('should unshift', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1]}
       }})
       st.unshift('names','d')
@@ -1259,7 +1259,7 @@ describe('lists', function(){
     })
 
     it('should change on unshift', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1]}
       }})
       var r = []
@@ -1272,7 +1272,7 @@ describe('lists', function(){
     })
 
     it('should unshift validate', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[],validate:function(x){if(!x)throw 'bad'}}
       }})
       st.unshift('names','d')
@@ -1282,7 +1282,7 @@ describe('lists', function(){
     })
 
     it('should pop', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1,2]}
       }})
       assert.strictEqual(st.pop('names'),2)
@@ -1290,7 +1290,7 @@ describe('lists', function(){
     })
 
     it('should change on pop', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1,2]}
       }})
       var r = []
@@ -1303,7 +1303,7 @@ describe('lists', function(){
     })
 
     it('should shift', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[3,4]}
       }})
       assert.strictEqual(st.shift('names'),3)
@@ -1311,7 +1311,7 @@ describe('lists', function(){
     })
 
     it('should change on shift', function(){
-      var st = new Stoar({defs:{
+      var st = Stoar.store({defs:{
         names: {type:'list',value:[1,2]}
       }})
       var r = []
@@ -1329,7 +1329,7 @@ describe('immutable', function(){
 
   it('should not set mutable to self', function(){
     var obj = {}
-    var store = new Stoar({
+    var store = Stoar.store({
       data: {foo:obj}
     })
     assert.throws(function(){
@@ -1338,7 +1338,7 @@ describe('immutable', function(){
   })
 
   it('should not change on immutable sameness', function(){
-    var store = new Stoar({
+    var store = Stoar.store({
       data: {foo:'w'}
     })
     store.on('propChange', function(){
@@ -1348,7 +1348,7 @@ describe('immutable', function(){
   })
 
   it('should not change on immutable sameness null', function(){
-    var store = new Stoar({
+    var store = Stoar.store({
       data: {foo:null}
     })
     store.on('propChange', function(){
@@ -1358,7 +1358,7 @@ describe('immutable', function(){
   })
 
   it('should not change on immutable sameness undefined', function(){
-    var store = new Stoar({
+    var store = Stoar.store({
       data: {foo:undefined}
     })
     store.on('propChange', function(){
@@ -1369,7 +1369,7 @@ describe('immutable', function(){
 
   it('should not change on immutable sameness function', function(){
     var fn = function(){}
-    var store = new Stoar({
+    var store = Stoar.store({
       data: {foo:fn}
     })
     store.on('propChange', function(){
@@ -1382,7 +1382,7 @@ describe('immutable', function(){
 describe('loadables', function(){
 
   it('should allow loadable', function(){
-    var store = new Stoar({
+    var store = Stoar.store({
       defs: {
         foo: {
           type: 'item',
@@ -1394,7 +1394,7 @@ describe('loadables', function(){
   })
 
   it('should allow loadable :loading', function(){
-    var store = new Stoar({
+    var store = Stoar.store({
       defs: {
         foo: {
           type: 'item',
@@ -1408,7 +1408,7 @@ describe('loadables', function(){
   })
 
   it('should allow loadable :status', function(){
-    var store = new Stoar({
+    var store = Stoar.store({
       defs: {
         foo: {
           type: 'item',
@@ -1422,7 +1422,7 @@ describe('loadables', function(){
   })
 
   it('should allow loadable :timestamp', function(){
-    var store = new Stoar({
+    var store = Stoar.store({
       defs: {
         foo: {
           type: 'item',

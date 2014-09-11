@@ -62,7 +62,7 @@ function getDefault(type){
 
 // ======================================================
 
-function Store(args){
+function Stoar(args){
   EventEmitter.call(this)
   var defs = this._defs = {}
   _.each(args.data, function(val, prop){
@@ -85,9 +85,9 @@ function Store(args){
   })
 }
 
-util.inherits(Store, EventEmitter);
+util.inherits(Stoar, EventEmitter);
 
-_.extend(Store.prototype, {
+_.extend(Stoar.prototype, {
 
   _change: function(def, change){
     var same = change.oldVal === change.newVal
@@ -103,7 +103,7 @@ _.extend(Store.prototype, {
   },
 
   dispatcher: function(args){
-    return new Dispatcher(this, args)
+    return new OldDispatcher(this, args)
   },
 
   emitter: function(args){
@@ -112,7 +112,7 @@ _.extend(Store.prototype, {
 })
 
 _.each(funcNames, function(funcName){
-  Store.prototype[funcName] = function(prop){
+  Stoar.prototype[funcName] = function(prop){
     if (!this._defs.hasOwnProperty(prop)){
       throw new Error(util.format('no property in store: %s', prop))
     }
@@ -129,10 +129,14 @@ _.each(funcNames, function(funcName){
   }
 })
 
+Stoar.registry = function(info){
+  return new Dispatcher(info)
+}
+
 // ======================================================
 // DISPATCHER
 
-function Dispatcher(store, args){
+function OldDispatcher(store, args){
   this._ctx = _.extend({}, args);
   this._ctx.store = store;
   this._defaultCommands = {};
@@ -141,7 +145,7 @@ function Dispatcher(store, args){
   }, this);
 }
 
-_.extend(Dispatcher.prototype, {
+_.extend(OldDispatcher.prototype, {
   command: function(){
     var args = Array.prototype.slice.call(arguments)
       ,command = args.shift()
@@ -206,6 +210,123 @@ _.extend(EmitterContext.prototype, {
 });
 
 // ======================================================
-// DONE
+// Dispatcher
 
-module.exports = Store;
+function Dispatcher(){
+  this._jobs = []
+}
+
+_.extend(Dispatcher.prototype, {
+
+  commander: function(methods){
+    var commander = new Commander(methods)
+    commander.on('action', _.bind(function(action, payload){
+      this._send(action, payload)
+    }, this))
+    return commander
+  },
+
+  notifier: function(){
+    var notifier = new Notifier()
+    return notifier
+  },
+
+  registerStore: function(store, callback){
+    if (store._name){
+      throw new Error('already registered')
+    }
+    var name = '_' + this._jobs.length
+    store._name = name
+    this._jobs.push({
+      name: name,
+      store: store,
+      callback: callback
+    })
+  },
+
+  waitFor: function(store){
+    var name = store._name
+    for (var i=0; i<this._jobs.length; i++){
+      var job = this._jobs[i]
+      if (job.name === name){
+        this._run(job)
+      }
+    }
+  },
+
+  _send: function(action, payload){
+    this._action = action
+    this._payload = payload
+    this._running = {}
+    this._ran = {}
+    for (var i=0; i<this._jobs.length; i++){
+      var job = this._jobs[i]
+      this._run(job)
+    }
+    delete this._jobs
+    delete this._action
+    delete this._payload
+    delete this._running
+    delete this._ran
+  },
+
+  _run: function(job){
+    if (this._running[job.name]){
+      throw new Error(util.format('waitFor cycle in dispatcher'))
+    }
+    if (!this._ran[job.name]){
+      this._running[job.name] = true
+      job.callback.call(this, this._action, this._payload)
+      delete this._running[job.name]
+    }
+    this._ran[job.name] = true
+  }
+})
+
+// ======================================================
+// Commander
+
+function Commander(methods){
+  EventEmitter.call(this)
+  _.extend(this, methods)
+}
+
+util.inherits(Commander, EventEmitter)
+
+_.extend(Commander.prototype, {
+  send: function(action, payload){
+    this.emit('action', action, payload)
+  }
+})
+
+// ======================================================
+// Notifier
+
+function Notifier(){
+  EventEmitter.call(this)
+}
+
+util.inherits(Notifier, EventEmitter)
+
+_.extend(Notifier.prototype, {
+})
+
+// ======================================================
+// Export
+
+_.extend(module.exports, {
+  store: function(args){
+    return new Stoar(args)
+  },
+  dispatcher: function(){
+    return new Dispatcher()
+  }
+})
+
+
+
+
+
+
+
+
