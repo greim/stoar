@@ -20,30 +20,70 @@ var Stoar = require('stoar');
 
 ## Building a basic Flux app
 
+Here are the main players in a Stoar flux app.
+
 ```js
-var dispatcher = Stoar.dispatcher();
-var uiStore = Stoar.store({...});
+// ------------------------------------
+// dispatcher.js
+var Stoar = require('stoar');
+module.exports = Stoar.dispatcher();
+```
+```js
+// ------------------------------------
+// ui-store.js
+var Stoar = require('stoar');
+var dispatcher = require('./dispatcher');
+var uiStore = module.exports = Stoar.store({...});
 dispatcher.registerStore(uiStore, function(action, payload){
   // respond to the action by mutating uiStore
 });
-var dataStore = Stoar.store({...});
+```
+```js
+// ------------------------------------
+// data-store.js
+var Stoar = require('stoar');
+var dispatcher = require('./dispatcher');
+var uiStore = require('./ui-store');
+var dataStore = module.exports = Stoar.store({...});
 dispatcher.registerStore(dataStore, function(action, payload){
   this.waitFor(uiStore);
   // respond to the action while being able
   // to see the latest data in uiStore
 });
-var commander = dispatcher.commander({
+```
+```js
+// ------------------------------------
+// commander.js
+var dispatcher = require('./dispatcher');
+module.exports = dispatcher.commander({
   doCustomThing: function(){}
 });
-commander.send(action, payload); // send an action to dispatcher
-commander.doCustomThing(); // custom method might have side effects
-var notifier = dispatcher.notifier();
+```
+```js
+// ------------------------------------
+// notifier.js
+var dispatcher = require('./dispatcher');
+module.exports = dispatcher.notifier();
+```
+```js
+// ------------------------------------
+// main-controller.js
+var notifier = require('./notifier');
 notifier.on('change', function(){
   // Debounced change notifier
   // fires asynchronously after
   // N synchronous update cycles
   topLevelComponent.setProps(...)
 });
+```
+```js
+// ------------------------------------
+// some-component.jsx
+var commander = require('./commander');
+...
+commander.send(action, payload); // send an action to dispatcher
+commander.doCustomThing(); // custom method might have side effects
+...
 ```
 
 ## Stores
