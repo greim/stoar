@@ -7,27 +7,21 @@ var _ = require('lodash')
   ,accFuncNames = _.keys(_.extend({}, itemFuncs.accessors, mapFuncs.accessors, listFuncs.accessors))
   ,mutFuncNames = _.keys(_.extend({}, itemFuncs.mutators, mapFuncs.mutators, listFuncs.mutators))
   ,funcsByType = {item:itemFuncs,map:mapFuncs,list:listFuncs}
+  ,isImmutable = require('./lib/is-immutable')
 
 // ======================================================
 
-var isImmutable = (function(){
-  var immuts = {
-    'string': 1,
-    'number': 1,
-    'function': 1,
-    'boolean': 1,
-    'undefined': 1
-  }
-  return function(val){
-    if (val === null){
-      return true
-    }
-    return immuts.hasOwnProperty(typeof val)
-  }
-})()
-
 var makeDef = (function(){
   var validTypes = {item:1,map:1,list:1}
+  function getDefault(type){
+    if (type === 'item'){
+      return undefined
+    } else if (type === 'map'){
+      return {}
+    } else if (type === 'list'){
+      return []
+    }
+  }
   return function(prop, def){
     def = _.extend({
       type: 'item', // 'item', 'map', 'list'
@@ -51,15 +45,6 @@ var makeDef = (function(){
   }
 })()
 
-function getDefault(type){
-  if (type === 'item'){
-    return undefined
-  } else if (type === 'map'){
-    return {}
-  } else if (type === 'list'){
-    return []
-  }
-}
 
 // ======================================================
 
@@ -135,8 +120,8 @@ _.each(mutFuncNames, function(funcName){
     if (!this._defs.hasOwnProperty(prop)){
       throw new Error(util.format('no property in store: %s', prop))
     }
-    if (this._locked){
-      throw new Error('cannot mutate the store outside a dispatcher cycle')
+    if (this._dispatcher && this._dispatcher._activeStore !== this){
+      throw new Error('cannot mutate a store outside a dispatcher cycle')
     }
     var def = this._defs[prop]
       ,type = def.type
@@ -156,7 +141,7 @@ Stoar.registry = function(info){
 }
 
 // ======================================================
-// DISPATCHER
+// OLD DISPATCHER
 
 function OldDispatcher(store, args){
   this._ctx = _.extend({}, args);
@@ -261,7 +246,7 @@ _.extend(Dispatcher.prototype, {
     this._createdCommander = true
     var commander = new Commander(methods)
     commander.on('action', _.bind(function(action, payload){
-      this._send(action, payload)
+      this._dispatch(action, payload)
     }, this))
     return commander
   },
@@ -290,27 +275,32 @@ _.extend(Dispatcher.prototype, {
     store.on('propChange', _.bind(function(prop, change){
       this._propChange(store, prop, change)
     }, this))
-    store._locked = true
+    store._dispatcher = this
   },
 
   waitFor: function(store){
     var name = store._name
+    var pendingActiveStore = this._activeStore
     for (var i=0; i<this._jobs.length; i++){
       var job = this._jobs[i]
       if (job.name === name){
+        this._activeStore = job.store
         this._run(job)
+        this._activeStore = pendingActiveStore
       }
     }
   },
 
-  _send: function(action, payload){
+  _dispatch: function(action, payload){
     this._action = action
     this._payload = payload
     this._running = {}
     this._ran = {}
     for (var i=0; i<this._jobs.length; i++){
       var job = this._jobs[i]
+      this._activeStore = job.store
       this._run(job)
+      delete this._activeStore
     }
     delete this._action
     delete this._payload
@@ -324,9 +314,7 @@ _.extend(Dispatcher.prototype, {
     }
     if (!this._ran[job.name]){
       this._running[job.name] = true
-      job.store._locked = false
       job.callback.call(this, this._action, this._payload)
-      job.store._locked = true
       delete this._running[job.name]
     }
     this._ran[job.name] = true

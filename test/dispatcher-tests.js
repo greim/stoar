@@ -23,7 +23,7 @@ describe('dispatcher', function(){
       assert.strictEqual(payload, 'bar')
       done()
     })
-    dsp._send('foo','bar')
+    dsp._dispatch('foo','bar')
   })
 
   it('should run in order', function(){
@@ -37,7 +37,7 @@ describe('dispatcher', function(){
     dsp.registerStore(barStore, function(action, payload){
       order += 'b'
     })
-    dsp._send('foo','bar')
+    dsp._dispatch('foo','bar')
     assert.strictEqual(order, 'ab')
   })
 
@@ -53,7 +53,7 @@ describe('dispatcher', function(){
     dsp.registerStore(barStore, function(action, payload){
       order += 'b'
     })
-    dsp._send('foo','bar')
+    dsp._dispatch('foo','bar')
     assert.strictEqual(order, 'ba')
   })
 
@@ -68,7 +68,7 @@ describe('dispatcher', function(){
       this.waitFor(fooStore)
     })
     assert.throws(function(){
-      dsp._send('foo','bar')
+      dsp._dispatch('foo','bar')
     }, /cycle/)
   })
 
@@ -87,7 +87,7 @@ describe('dispatcher', function(){
       this.waitFor(fooStore)
     })
     assert.throws(function(){
-      dsp._send('foo','bar')
+      dsp._dispatch('foo','bar')
     }, /cycle/)
   })
 
