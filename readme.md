@@ -1,12 +1,12 @@
 # Stoar
 
-Note: this library is still experimental.
+Note: this library is somewhat experimental.
 
 A set of tools for the [Flux](http://facebook.github.io/react/docs/flux-overview.html) architecture.
 It provides you with:
 
  * **Data store** -- A container for application state.
- * **Dispatcher** -- An object that mediates data flow into your stores.
+ * **Dispatcher** -- An object that mediates data flow in and out of your stores.
  * **Commander** -- The entry point where data flows into the dispatcher.
  * **Notifier** -- The exit point where data flows out of the dispatcher.
 
@@ -20,7 +20,22 @@ var Stoar = require('stoar');
 
 ## Building a basic Flux app
 
-Here are the main players in a Stoar flux app.
+Here are the things you do in order to build a Flux app.
+First, create your objects.
+These will be singletons which are accessible to the rest of your code.
+
+ 1. Create a dispatcher.
+ 1. Create data stores.
+ 1. Create a commander from the dispatcher.
+ 1. Create a notifier from the dispatcher.
+
+Next, wire up these objects.
+
+ 1. Register each data store with the dispatcher, providing a callback. Within the callback, update the store's contents as appropriate, depending on the action.
+ 1. Listen for change events on the notifier re-rendering your top-level React component for each one.
+ 1. Send actions to the commander in response to various events in your app, e.g. user-initiated, server-push, app initialize, window resize, polling/fetching, etc.
+
+Here are the main players in a Stoar flux app as files.
 
 ```js
 // ------------------------------------
@@ -35,7 +50,7 @@ var Stoar = require('stoar');
 var dispatcher = require('./dispatcher');
 var uiStore = module.exports = Stoar.store({...});
 dispatcher.registerStore(uiStore, function(action, payload){
-  // respond to the action by mutating uiStore
+  uiStore.set(...) // mutate the store here
 });
 ```
 ```js
@@ -86,7 +101,7 @@ commander.doCustomThing(); // custom method might have side effects
 ...
 ```
 
-## Stores. How do they work?
+## Stores.
 
 ```js
 var store = Stoar.store({
@@ -109,7 +124,8 @@ store.forEach('foods', function(food){
 });
 ```
 
-Each data item receives a definition, which is an object with `type`, `value` and `validate` properties.
+Two data items are defined in this store: `count` and `foods`.
+Each receives a definition, which is an object with `type`, `value` and `validate` properties.
 
   * **type** - Possible values include: `item`, `map`, and `list`. Optional; defaults to `item`. The `type` determines what kinds of operations are available on this store property.
   * **value** - The initial content of this property in the store. If `type === 'map`, this must be a plain object. If `type === 'list'`, this must be an array. This is optional, with a default value depending on `type`.
