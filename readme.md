@@ -36,7 +36,7 @@ Next, wire up these objects.
  1. Send actions to the commander in response to various events in your app, e.g. user-initiated, server-push, app initialize, window resize, polling/fetching, etc. Actions always have the signature `(action, payload)` where `action` is a string and `payload` is any value whatsoever.
  1. At any point in the app it's okay to read data from the stores. However, only in a given store's action callback is it okay to mutate that store.
 
-Here are the main players in a Stoar flux app, represented as files.
+Here's the same thing but laid out as files.
 
 ```js
 // ------------------------------------
