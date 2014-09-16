@@ -235,6 +235,7 @@ In old browsers you may need to polyfill `Array.prototype` in order for these to
  * `var commander = dispatcher.commander(methods)` - Create a commander. `methods` is an object containing any custom method you'd like to have on the created commander.
  * `var notifier = dispatcher.notifier()` - Create a notifier.
  * `dispatcher.waitFor(store)` - Call this synchronously from within a store's action callback. Causes another store to be updated first.
+ * `dispatcher.registerStore(store, callback)` - Register a store with the dispatcher. `callback` must either be a function receiving a `(action, payload)` signature, or an object keyed by action names and whose values are functions receiving a `(payload)` signature.
 
 ## Commander API
 
