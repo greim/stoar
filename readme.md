@@ -138,7 +138,7 @@ Each receives a definition, which is an object with `type`, `value` and `validat
   * **type** - Possible values include: `item`, `map`, and `list`. Optional; defaults to `item`. The `type` determines what kinds of operations are available on this store property.
   * **value** - The initial content of this property in the store. If `type === 'map`, this must be a plain object. If `type === 'list'`, this must be an array. This is optional, with a default value depending on `type`.
   * **validate** - An optional function that runs against every value set on this store property. For `map` and `list` types, this runs against every item in that map or list. It should throw for bad values. The return value is discarded.
-  * **loadable** - Indicates that this property is associated with a remote data source. Setting this to `true` causes some extra properties to be added. For example if the property is called `posts`, properties called `posts:loading`, `posts:status`, and `posts:timestamp` will be created too, each with a corresponding `type`. It's up to you how to use these extra properties.
+  * **loadable** - Indicates that this property is associated with a remote data source. Setting this to `true` merely causes some extra properties to be added. For example if the property is called `posts`, then properties called `posts:loading`, `posts:status`, and `posts:timestamp` will be created too, each with a corresponding `type`. It's up to you whether and how to use these extra properties.
 
 ## Immutability and Cloning
 
@@ -171,12 +171,10 @@ var deepClone = store.clone('stuff', true);
 
 ## API
 
-### Stoar singleton API
+### Top-level API
 
  * `var store = Stoar.store()` - Create a data store.
  * `var disp = Stoar.dispatcher()` - Create a dispatcher.
- * `var commander = disp.commander()` - Create a commander from the dispatcher. You can only create one commander from a dispatcher.
- * `var notifier = disp.notifier()` - Create a notifier from the dispatcher. You can only create one notifier from a dispatcher.
 
 ### Items
 
