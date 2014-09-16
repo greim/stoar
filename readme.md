@@ -5,8 +5,8 @@ Note: this library is somewhat experimental.
 A set of tools for the [Flux](http://facebook.github.io/react/docs/flux-overview.html) architecture.
 It provides you with:
 
- * **Data store** -- A container for application state.
- * **Dispatcher** -- An object that mediates data flow in and out of your stores.
+ * **Store** -- A container for application state.
+ * **Dispatcher** -- An object that mediates data flow to and from your stores.
  * **Commander** -- The entry point where data flows into the dispatcher.
  * **Notifier** -- The exit point where data flows out of the dispatcher.
 
@@ -22,7 +22,7 @@ var Stoar = require('stoar');
 
 Here are the things you do in order to build a Flux app.
 First, create your objects.
-These will be singletons which are accessible to the rest of your code.
+These will be singletons which should be accessible to the rest of your code.
 
  1. Create a dispatcher.
  1. Create data stores.
@@ -31,11 +31,12 @@ These will be singletons which are accessible to the rest of your code.
 
 Next, wire up these objects.
 
- 1. Register each data store with the dispatcher, providing a callback. Within the callback, update the store's contents as appropriate, depending on the action.
- 1. Listen for change events on the notifier, re-rendering your top-level React component(s) for each change.
- 1. Send actions to the commander in response to various events in your app, e.g. user-initiated, server-push, app initialize, window resize, polling/fetching, etc.
+ 1. Register each data store with the dispatcher, providing an *action callback*. Within the callback, mutate the store's contents as appropriate, depending on the action.
+ 1. Listen for change events on the notifier, re-rendering your top-level React component(s) for each change. Do not listen for change events from anywhere but the top level components, as changes will propagate down via your render functions.
+ 1. Send actions to the commander in response to various events in your app, e.g. user-initiated, server-push, app initialize, window resize, polling/fetching, etc. Actions always have the signature `(action, payload)` where `action` is a string and `payload` is any value whatsoever.
+ 1. At any point in the app it's okay to read data from the stores. However, only in a given store's action callback is it okay to mutate that store.
 
-Here are the main players in a Stoar flux app as files.
+Here are the main players in a Stoar flux app, represented as files.
 
 ```js
 // ------------------------------------
@@ -101,7 +102,14 @@ commander.doCustomThing(); // custom method might have side effects
 ...
 ```
 
-## Stores.
+## Where to do data fetches?
+
+**Stores must be mutated synchronously in their action callbacks.**
+
+Asynchronous mutations would thus be forced to re-run the callback by calling the commander again.
+Therefore, data fetches make most sense to happen from commander logic in the first place.
+
+## Stores
 
 ```js
 var store = Stoar.store({
@@ -221,3 +229,30 @@ In old browsers you may need to polyfill `Array.prototype` in order for these to
  * `store.concat(prop, ...)`
  * `store.indexOf(prop, ...)`
  * `store.lastIndexOf(prop, ...)`
+
+## Dispatcher API
+
+ * `var commander = dispatcher.commander(methods)` - Create a commander. `methods` is an object containing any custom method you'd like to have on the created commander.
+ * `var notifier = dispatcher.notifier()` - Create a notifier.
+ * `dispatcher.waitFor(store)` - Call this synchronously from within a store's action callback. Causes another store to be updated first.
+
+## Commander API
+
+ * `commander.send(action, payload)` - Send an action directly to the dispatcher.
+ * `commander.myCustomMethod(any, args)` - Call a custom method that you provided when creating the commander.
+
+## Notifier API
+
+ * `notifier.on('change', callback)` - Listen for changes to any of the stores that have been registered with the dispatcher.
+
+
+
+
+
+
+
+
+
+
+
+
