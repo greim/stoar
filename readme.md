@@ -86,9 +86,6 @@ module.exports = dispatcher.notifier();
 // main-controller.js
 var notifier = require('./notifier');
 notifier.on('change', function(){
-  // Debounced change notifier
-  // fires asynchronously after
-  // N synchronous update cycles
   topLevelComponent.setProps(...)
 });
 ```
