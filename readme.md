@@ -5,10 +5,10 @@ Note: this library is somewhat experimental.
 A set of tools for the [Flux](http://facebook.github.io/react/docs/flux-overview.html) architecture.
 It provides you with:
 
- * **Store** -- A container for application state.
- * **Dispatcher** -- An object that mediates data flow to and from your stores.
- * **Commander** -- The entry point where data flows into the dispatcher.
- * **Notifier** -- The exit point where data flows out of the dispatcher.
+ * **Store** - A container for application state.
+ * **Dispatcher** - An object that mediates data flow to and from your stores.
+ * **Commander** - The entry point where data flows into the dispatcher.
+ * **Notifier** - The exit point where data flows out of the stores.
 
 ```sh
 % npm install stoar
@@ -21,11 +21,11 @@ var Stoar = require('stoar');
 ## Building a basic Flux app
 
 Here are the things you do in order to build a Flux app.
-First, create your objects.
+First, define your objects.
 These will be singletons which should be accessible to the rest of your code.
 
  1. Create a dispatcher.
- 1. Create data stores.
+ 1. Create one or more data stores.
  1. Create a commander from the dispatcher.
  1. Create a notifier from the dispatcher.
 
