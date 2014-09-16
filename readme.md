@@ -32,7 +32,7 @@ These will be singletons which are accessible to the rest of your code.
 Next, wire up these objects.
 
  1. Register each data store with the dispatcher, providing a callback. Within the callback, update the store's contents as appropriate, depending on the action.
- 1. Listen for change events on the notifier re-rendering your top-level React component for each one.
+ 1. Listen for change events on the notifier, re-rendering your top-level React component(s) for each change.
  1. Send actions to the commander in response to various events in your app, e.g. user-initiated, server-push, app initialize, window resize, polling/fetching, etc.
 
 Here are the main players in a Stoar flux app as files.

@@ -265,6 +265,15 @@ _.extend(Dispatcher.prototype, {
     if (store._name){
       throw new Error('already registered')
     }
+    if (typeof callback !== 'function'){
+      var callbacks = callback
+        ,self = this
+      callback = function(action, payload){
+        if (callbacks.hasOwnProperty(action)){
+          return callbacks[action].call(self, payload)
+        }
+      }
+    }
     var name = '_' + this._jobs.length
     store._name = name
     this._jobs.push({
