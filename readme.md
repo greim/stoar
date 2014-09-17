@@ -5,9 +5,9 @@ Note: this library is somewhat experimental.
 A set of tools for the [Flux](http://facebook.github.io/react/docs/flux-overview.html) architecture.
 It provides you with:
 
+ * **Dispatcher** - An object that mediates data flow to and from your stores. This is the central hub of your Flux app.
  * **Store** - A container for application state.
- * **Dispatcher** - An object that mediates data flow to and from your stores.
- * **Commander** - The entry point where data flows into the dispatcher.
+ * **Commander** - The entry point where data flows into the stores.
  * **Notifier** - The exit point where data flows out of the stores.
 
 ```sh
