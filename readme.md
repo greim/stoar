@@ -25,13 +25,12 @@ First, define your objects.
 These will be singletons which should be accessible to the rest of your code.
 
  1. Create a dispatcher.
- 1. Create one or more data stores.
- 1. Create a commander from the dispatcher.
+ 1. Create one or more stores from the dispatcher and provide action callbacks for each.
+ 1. Create a commander from the dispatcher, with optional custom methods.
  1. Create a notifier from the dispatcher.
 
 Next, wire up these objects.
 
- 1. Register each data store with the dispatcher, providing an *action callback*. Within the callback, mutate the store's contents as appropriate, depending on the action.
  1. Listen for change events on the notifier, re-rendering your top-level React component(s) for each change. Do not listen for change events from anywhere but the top level components, as changes will propagate down via your render functions.
  1. Send actions to the commander in response to various events in your app, e.g. user-initiated, server-push, app initialize, window resize, polling/fetching, etc. Actions always have the signature `(action, payload)` where `action` is a string and `payload` is any value whatsoever.
  1. At any point in the app it's okay to read data from the stores. However, only in a given store's action callback is it okay to mutate that store.
@@ -47,21 +46,21 @@ module.exports = Stoar.dispatcher();
 ```js
 // ------------------------------------
 // ui-store.js
-var Stoar = require('stoar');
 var dispatcher = require('./dispatcher');
-var uiStore = module.exports = Stoar.store({...});
-dispatcher.registerStore(uiStore, function(action, payload){
+var uiStore = module.exports = dispatcher.store({
+  // define data here
+}, function(action, payload){
   uiStore.set(...) // mutate the store here
 });
 ```
 ```js
 // ------------------------------------
 // data-store.js
-var Stoar = require('stoar');
 var dispatcher = require('./dispatcher');
 var uiStore = require('./ui-store');
-var dataStore = module.exports = Stoar.store({...});
-dispatcher.registerStore(dataStore, function(action, payload){
+var dataStore = module.exports = dispatcher.store({
+  // define data here
+}, function(action, payload){
   this.waitFor(uiStore);
   // respond to the action while being able
   // to see the latest data in uiStore
@@ -110,15 +109,13 @@ Therefore, data fetches make most sense to happen from commander logic in the fi
 
 ```js
 var store = Stoar.store({
-  defs: {
-    count: {
-      type: 'item',
-      value: 0
-    },
-    foods: {
-      type: 'list',
-      value: ['pizza','salad','eggs']
-    }
+  count: {
+    type: 'item',
+    value: 0
+  },
+  foods: {
+    type: 'list',
+    value: ['pizza','salad','eggs']
   }
 });
 
@@ -144,10 +141,8 @@ Thus, stoar rejects resetting a mutable property to itself, and provides a `clon
 
 ```js
 var store = new Stoar({
-  defs: {
-    user: {
-      value: { name: 'jorge' }
-    }
+  user: {
+    value: { name: 'jorge' }
   }
 });
 
@@ -170,8 +165,14 @@ var deepClone = store.clone('stuff', true);
 
 ### Top-level API
 
- * `var store = Stoar.store()` - Create a data store.
  * `var disp = Stoar.dispatcher()` - Create a dispatcher.
+
+## Dispatcher API
+
+ * `var store = dispatcher.store(defs, actionCallback)` - Create a store. `defs` is an object describing the store's data. `actionCallback` is a callback that receives a signature `(action, payload)` for whenever the dispatcher receives a command, or an object keyed by action names and whose values are functions receiving a `(payload)` signature.
+ * `var commander = dispatcher.commander(methods)` - Create a commander. `methods` is an object containing any custom method you'd like to have on the created commander.
+ * `var notifier = dispatcher.notifier()` - Create a notifier.
+ * `dispatcher.waitFor(store)` - Call this synchronously from within a store's action callback. Causes another store to be updated first.
 
 ### Items
 
@@ -224,13 +225,6 @@ In old browsers you may need to polyfill `Array.prototype` in order for these to
  * `store.concat(prop, ...)`
  * `store.indexOf(prop, ...)`
  * `store.lastIndexOf(prop, ...)`
-
-## Dispatcher API
-
- * `var commander = dispatcher.commander(methods)` - Create a commander. `methods` is an object containing any custom method you'd like to have on the created commander.
- * `var notifier = dispatcher.notifier()` - Create a notifier.
- * `dispatcher.waitFor(store)` - Call this synchronously from within a store's action callback. Causes another store to be updated first.
- * `dispatcher.registerStore(store, callback)` - Register a store with the dispatcher. `callback` must either be a function receiving a `(action, payload)` signature, or an object keyed by action names and whose values are functions receiving a `(payload)` signature.
 
 ## Commander API
 
