@@ -8,7 +8,7 @@ var assert = require('assert');
 //var await = require('await');
 var Stoar = require('../index');
 
-describe('dispatcher', function(){
+describe('commander', function(){
 
   it('should work', function(){
     var dsp = Stoar.dispatcher()
@@ -27,8 +27,7 @@ describe('dispatcher', function(){
   it('should send', function(done){
     var dsp = Stoar.dispatcher()
     var cdr = dsp.commander()
-    var fooStore = Stoar.store({data:{foo:1}})
-    dsp.registerStore(fooStore, function(action, payload){
+    var fooStore = dsp.store({foo:1}, function(action, payload){
       assert.strictEqual(action, 'foo')
       assert.strictEqual(payload, 'bar')
       done()
@@ -43,8 +42,7 @@ describe('dispatcher', function(){
         this.send('x','y')
       }
     })
-    var fooStore = Stoar.store({data:{foo:1}})
-    dsp.registerStore(fooStore, function(action, payload){
+    var fooStore = dsp.store({foo:1}, function(action, payload){
       assert.strictEqual(action, 'x')
       assert.strictEqual(payload, 'y')
       done()

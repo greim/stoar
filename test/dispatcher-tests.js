@@ -17,8 +17,7 @@ describe('dispatcher', function(){
 
   it('should dispatch', function(done){
     var dsp = Stoar.dispatcher()
-    var fooStore = Stoar.store({data:{foo:1}})
-    dsp.registerStore(fooStore, function(action, payload){
+    var fooStore = dsp.store({foo:1}, function(action, payload){
       assert.strictEqual(action, 'foo')
       assert.strictEqual(payload, 'bar')
       done()
@@ -29,12 +28,10 @@ describe('dispatcher', function(){
   it('should run in order', function(){
     var order = ''
     var dsp = Stoar.dispatcher()
-    var fooStore = Stoar.store({data:{foo:1}})
-    var barStore = Stoar.store({data:{bar:1}})
-    dsp.registerStore(fooStore, function(action, payload){
+    var fooStore = dsp.store({foo:1}, function(action, payload){
       order += 'a'
     })
-    dsp.registerStore(barStore, function(action, payload){
+    var barStore = dsp.store({bar:1}, function(action, payload){
       order += 'b'
     })
     dsp._dispatch('foo','bar')
@@ -44,13 +41,11 @@ describe('dispatcher', function(){
   it('should waitFor', function(){
     var order = ''
     var dsp = Stoar.dispatcher()
-    var fooStore = Stoar.store({data:{foo:1}})
-    var barStore = Stoar.store({data:{bar:1}})
-    dsp.registerStore(fooStore, function(action, payload){
+    var fooStore = dsp.store({foo:1}, function(action, payload){
       this.waitFor(barStore)
       order += 'a'
     })
-    dsp.registerStore(barStore, function(action, payload){
+    var barStore = dsp.store({bar:1}, function(action, payload){
       order += 'b'
     })
     dsp._dispatch('foo','bar')
@@ -59,12 +54,10 @@ describe('dispatcher', function(){
 
   it('should fail on cyclic dependencies', function(){
     var dsp = Stoar.dispatcher()
-    var fooStore = Stoar.store({data:{foo:1}})
-    var barStore = Stoar.store({data:{bar:1}})
-    dsp.registerStore(fooStore, function(action, payload){
+    var fooStore = dsp.store({foo:1}, function(action, payload){
       this.waitFor(barStore)
     })
-    dsp.registerStore(barStore, function(action, payload){
+    var barStore = dsp.store({bar:1}, function(action, payload){
       this.waitFor(fooStore)
     })
     assert.throws(function(){
@@ -74,30 +67,18 @@ describe('dispatcher', function(){
 
   it('should fail on indirect cyclic dependencies', function(){
     var dsp = Stoar.dispatcher()
-    var fooStore = Stoar.store({data:{foo:1}})
-    var barStore = Stoar.store({data:{bar:1}})
-    var bazStore = Stoar.store({data:{baz:1}})
-    dsp.registerStore(fooStore, function(action, payload){
+    var fooStore = dsp.store({foo:1}, function(action, payload){
       this.waitFor(barStore)
     })
-    dsp.registerStore(barStore, function(action, payload){
+    var barStore = dsp.store({bar:1}, function(action, payload){
       this.waitFor(bazStore)
     })
-    dsp.registerStore(bazStore, function(action, payload){
+    var bazStore = dsp.store({baz:1}, function(action, payload){
       this.waitFor(fooStore)
     })
     assert.throws(function(){
       dsp._dispatch('foo','bar')
     }, /cycle/)
-  })
-
-  it('should fail on duplicate registration', function(){
-    var dsp = Stoar.dispatcher()
-    var fooStore = Stoar.store({data:{foo:1}})
-    dsp.registerStore(fooStore, function(){})
-    assert.throws(function(){
-      dsp.registerStore(fooStore, function(){})
-    }, /already/)
   })
 })
 
