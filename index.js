@@ -1,150 +1,274 @@
-var _ = require('lodash');
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
+var _ = require('lodash')
+  ,EventEmitter = require('events').EventEmitter
+  ,util = require('util')
+  ,itemFuncs = require('./lib/item-functions')
+  ,mapFuncs = require('./lib/map-functions')
+  ,listFuncs = require('./lib/list-functions')
+  ,accFuncNames = _.keys(_.extend({}, itemFuncs.accessors, mapFuncs.accessors, listFuncs.accessors))
+  ,mutFuncNames = _.keys(_.extend({}, itemFuncs.mutators, mapFuncs.mutators, listFuncs.mutators))
+  ,funcsByType = {item:itemFuncs,map:mapFuncs,list:listFuncs}
+  ,isImmutable = require('./lib/is-immutable')
 
 // ======================================================
-// MAIN
+// Store
+
+var makeDef = (function(){
+  var validTypes = {item:1,map:1,list:1}
+  function getDefault(type){
+    if (type === 'item'){
+      return undefined
+    } else if (type === 'map'){
+      return {}
+    } else if (type === 'list'){
+      return []
+    }
+  }
+  return function(prop, def){
+    def = _.extend({
+      type: 'item', // 'item', 'map', 'list'
+      validate: function(){}
+    }, def)
+    if (!def.hasOwnProperty('value')){
+      def.value = getDefault(def.type)
+    }
+    if (!validTypes.hasOwnProperty(def.type)){
+      throw new Error(util.format('invalid type: %s', def.type))
+    }
+    def.prop = prop
+    if (def.type === 'item'){
+      def.validate(def.value)
+    } else {
+      _.each(def.value, function(val){
+        def.validate(val)
+      })
+    }
+    return def
+  }
+})()
 
 function Store(args){
-  if (!args.data){
-    throw new Error('missing data');
-  }
-  this._data = _.extend({}, args.data);
-  if (typeof args.init === 'function'){
-    args.init.call(this);
-  }
-  this._emitter = new EventEmitter();
+  EventEmitter.call(this)
+  var defs = this._defs = {}
+  _.each(args, function(def, prop){
+    if (isImmutable(def)){
+      def = {value:def}
+    }
+    defs[prop] = makeDef(prop, def)
+  })
+  _.each(_.keys(defs), function(prop){
+    var def = defs[prop]
+    if (def.loadable){
+      _.each([
+        prop+':loading',
+        prop+':status',
+        prop+':timestamp'
+      ], function(extraProp){
+        defs[extraProp] = makeDef(extraProp, {type:def.type})
+      })
+    }
+  })
 }
 
-var immutableTypes = {
-  'boolean':true,
-  'string':true,
-  'number':true,
-  'function':true,
-  'undefined': true
-};
+util.inherits(Store, EventEmitter);
 
 _.extend(Store.prototype, {
 
-  set: function(prop, newVal){
-    var oldVal = this._data[prop];
-    var isImmut = newVal === null || immutableTypes.hasOwnProperty(typeof newVal);
-    var shouldChange = !isImmut || oldVal !== newVal;
-    if (shouldChange){
-      this._data[prop] = newVal;
-      this._emitter.emit('change', prop, newVal, oldVal);
+  _change: function(def, change){
+    var same = change.oldVal === change.newVal
+      ,isMut = !isImmutable(change.newVal)
+      ,allowMut = def.allowMutableValues
+    if (same && isMut && !allowMut){
+      throw new Error('cannot set a mutable value to itself')
     }
-  },
-
-  get: function(prop){
-    return this._data[prop];
-  },
-
-  clone: function(prop, deep){
-    var val = this._data[prop];
-    if (!immutableTypes.hasOwnProperty(typeof val) || val === null){
-      if (deep){
-        return _.cloneDeep(val);
-      } else {
-        return _.clone(val);
-      }
-    } else {
-      return val;
+    if (!same || (isMut && allowMut)){
+      this.emit('change', def.prop, change)
     }
-  },
-
-  dispatcher: function(args){
-    return new Dispatcher(this, args);
-  },
-
-  emitter: function(args){
-    return new Emitter(this, args);
   }
-});
+})
+
+_.each(accFuncNames, function(funcName){
+  Store.prototype[funcName] = function(prop){
+    if (!this._defs.hasOwnProperty(prop)){
+      throw new Error(util.format('no property in store: %s', prop))
+    }
+    var def = this._defs[prop]
+      ,type = def.type
+      ,funcs = funcsByType[type].accessors
+    if (!funcs){
+      throw new Error(util.format('no such method for %s types', type))
+    } else {
+      var args = Array.prototype.slice.call(arguments)
+      args[0] = def
+      return funcs[funcName].apply(this, args)
+    }
+  }
+})
+
+_.each(mutFuncNames, function(funcName){
+  Store.prototype[funcName] = function(prop){
+    if (!this._defs.hasOwnProperty(prop)){
+      throw new Error(util.format('no property in store: %s', prop))
+    }
+    if (this._dispatcher && this._dispatcher._activeStore !== this){
+      throw new Error('cannot mutate a store outside a dispatcher cycle')
+    }
+    var def = this._defs[prop]
+      ,type = def.type
+      ,funcs = funcsByType[type].mutators
+    if (!funcs){
+      throw new Error(util.format('no such method for %s types', type))
+    } else {
+      var args = Array.prototype.slice.call(arguments)
+      args[0] = def
+      return funcs[funcName].apply(this, args)
+    }
+  }
+})
 
 // ======================================================
-// DISPATCHER
+// Dispatcher
 
-function Dispatcher(store, args){
-  this._ctx = _.extend({}, args);
-  this._ctx.store = store;
-  if (typeof this._ctx.init === 'function'){
-    this._ctx.init.call(this._ctx);
-  }
-  this._defaultCommands = {};
-  _.each(store._data, function(value, prop){
-    this._defaultCommands['change:'+prop] = prop;
-  }, this);
+function Dispatcher(){
+  this._jobs = []
 }
 
 _.extend(Dispatcher.prototype, {
-  command: function(command, firstArg){
-    var hasDefault = this._defaultCommands.hasOwnProperty(command);
-    var retVal;
-    if (!this._ctx.hasOwnProperty(command)){
-      if (!hasDefault){
-        throw new Error(util.format('%s is not a command', command));
+
+  store: function(args, callback){
+    var store = new Store(args)
+    if (typeof callback !== 'function'){
+      var callbacks = callback
+        ,self = this
+      callback = function(action, payload){
+        if (callbacks.hasOwnProperty(action)){
+          return callbacks[action].call(self, payload)
+        }
       }
-    } else {
-      var args = Array.prototype.slice.call(arguments);
-      args.shift();
-      retVal = this._ctx[command].apply(this._ctx, args);
     }
-    if (hasDefault && (retVal === undefined || retVal)){
-      var prop = this._defaultCommands[command];
-      this._ctx.store.set(prop, firstArg);
+    var name = '_' + this._jobs.length
+    store._name = name
+    this._jobs.push({
+      name: name,
+      store: store,
+      callback: callback
+    })
+    store.on('change', _.bind(function(prop, change){
+      this._propChange(store, prop, change)
+    }, this))
+    store._dispatcher = this
+    return store
+  },
+
+  commander: function(methods){
+    if (this._createdCommander){
+      throw new Error('a dispatcher cant create two commanders')
     }
+    this._createdCommander = true
+    var commander = new Commander(methods)
+    commander.on('action', _.bind(function(action, payload){
+      this._dispatch(action, payload)
+    }, this))
+    return commander
+  },
+
+  notifier: function(){
+    if (this._notifier){
+      throw new Error('a dispatcher cant create two commanders')
+    }
+    this._notifier = new Notifier()
+    return this._notifier
+  },
+
+  waitFor: function(store){
+    var name = store._name
+    var pendingActiveStore = this._activeStore
+    for (var i=0; i<this._jobs.length; i++){
+      var job = this._jobs[i]
+      if (job.name === name){
+        this._activeStore = job.store
+        this._run(job)
+        this._activeStore = pendingActiveStore
+      }
+    }
+  },
+
+  _propChange: function(store, prop, change){
+    if (this._notifier){
+      this._notifier.emit('change', store, prop, change)
+    }
+  },
+
+  _dispatch: function(action, payload){
+    this._action = action
+    this._payload = payload
+    this._running = {}
+    this._ran = {}
+    for (var i=0; i<this._jobs.length; i++){
+      var job = this._jobs[i]
+      this._activeStore = job.store
+      this._run(job)
+      delete this._activeStore
+    }
+    delete this._action
+    delete this._payload
+    delete this._running
+    delete this._ran
+  },
+
+  _run: function(job){
+    if (this._running[job.name]){
+      throw new Error(util.format('waitFor cycle in dispatcher'))
+    }
+    if (!this._ran[job.name]){
+      this._running[job.name] = true
+      job.callback.call(this, this._action, this._payload)
+      delete this._running[job.name]
+    }
+    this._ran[job.name] = true
   }
-});
+})
 
 // ======================================================
-// EMITTER
+// Commander
 
-function EmitterContext(store, args){
-  _.extend(this, args);
-  this.store = store;
+function Commander(methods){
+  EventEmitter.call(this)
+  _.extend(this, methods)
 }
 
-function Emitter(store, args){
-  var self = this;
-  EventEmitter.call(this);
-  this._ctx = new EmitterContext(store, args);
-  this._ctx._emitter = this;
-  if (typeof this._ctx.init === 'function'){
-    this._ctx.init.call(this._ctx);
-  }
-  store._emitter.on('change', function(prop, val, old){
-    var events = ['change','change:' + prop];
-    for (var i=0; i<events.length; i++){
-      var changeEv = events[i];
-      var isJustChange = changeEv === 'change';
-      var func = self._ctx[changeEv];
-      var retVal;
-      if (typeof func === 'function'){
-        retVal = isJustChange
-          ? func.call(self._ctx, prop, val, old)
-          : func.call(self._ctx, val, old)
-      }
-      if (retVal === undefined || retVal){
-        isJustChange
-          ? self.emit(changeEv, prop, val, old)
-          : self.emit(changeEv, val, old)
-      } else {
-        break;
-      }
-    }
-  });
-}
+util.inherits(Commander, EventEmitter)
 
-util.inherits(Emitter, EventEmitter);
-
-_.extend(EmitterContext.prototype, {
-  emit: function(){
-    return this._emitter.emit.apply(this._emitter, arguments);
+_.extend(Commander.prototype, {
+  send: function(action, payload){
+    this.emit('action', action, payload)
   }
-});
+})
 
 // ======================================================
-// DONE
+// Notifier
 
-module.exports = Store;
+function Notifier(){
+  EventEmitter.call(this)
+}
+
+util.inherits(Notifier, EventEmitter)
+
+_.extend(Notifier.prototype, {
+})
+
+// ======================================================
+// Export
+
+_.extend(module.exports, {
+  dispatcher: function(){
+    return new Dispatcher()
+  }
+})
+
+
+
+
+
+
+
+
