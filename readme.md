@@ -1,7 +1,5 @@
 # Stoar
 
-Note: this library is somewhat experimental.
-
 A set of tools for the [Flux](http://facebook.github.io/react/docs/flux-overview.html) architecture.
 It provides you with:
 
