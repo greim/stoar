@@ -42,7 +42,7 @@ describe('dispatcher', function(){
     var order = ''
     var dsp = Stoar.dispatcher()
     var fooStore = dsp.store({foo:1}, function(action, payload){
-      this.waitFor(barStore)
+      dsp.waitFor(barStore)
       order += 'a'
     })
     var barStore = dsp.store({bar:1}, function(action, payload){
@@ -55,10 +55,10 @@ describe('dispatcher', function(){
   it('should fail on cyclic dependencies', function(){
     var dsp = Stoar.dispatcher()
     var fooStore = dsp.store({foo:1}, function(action, payload){
-      this.waitFor(barStore)
+      dsp.waitFor(barStore)
     })
     var barStore = dsp.store({bar:1}, function(action, payload){
-      this.waitFor(fooStore)
+      dsp.waitFor(fooStore)
     })
     assert.throws(function(){
       dsp._dispatch('foo','bar')
@@ -68,13 +68,13 @@ describe('dispatcher', function(){
   it('should fail on indirect cyclic dependencies', function(){
     var dsp = Stoar.dispatcher()
     var fooStore = dsp.store({foo:1}, function(action, payload){
-      this.waitFor(barStore)
+      dsp.waitFor(barStore)
     })
     var barStore = dsp.store({bar:1}, function(action, payload){
-      this.waitFor(bazStore)
+      dsp.waitFor(bazStore)
     })
     var bazStore = dsp.store({baz:1}, function(action, payload){
-      this.waitFor(fooStore)
+      dsp.waitFor(fooStore)
     })
     assert.throws(function(){
       dsp._dispatch('foo','bar')

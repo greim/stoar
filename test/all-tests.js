@@ -33,6 +33,16 @@ describe('stoar', function(){
     assert.strictEqual(store.get('foo'), null);
   });
 
+  it('should hasProperty', function(){
+    var store = disp.store({foo:null});
+    assert.ok(store.hasProperty('foo'));
+  });
+
+  it('should not hasProperty', function(){
+    var store = disp.store({foo:null});
+    assert.ok(!store.hasProperty('bar'));
+  });
+
   it('should clone', function(){
     var foo = {bar:'a'};
     var store = disp.store({foo:{value:foo}});

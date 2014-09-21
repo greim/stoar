@@ -83,6 +83,10 @@ _.extend(Store.prototype, {
     if (!same || (isMut && allowMut)){
       this.emit('change', def.prop, change)
     }
+  },
+
+  hasProperty: function(prop){
+    return this._defs.hasOwnProperty(prop)
   }
 })
 
@@ -221,7 +225,7 @@ _.extend(Dispatcher.prototype, {
     }
     if (!this._ran[job.name]){
       this._running[job.name] = true
-      job.callback.call(this, this._action, this._payload)
+      job.callback.call(job.store, this._action, this._payload)
       delete this._running[job.name]
     }
     this._ran[job.name] = true

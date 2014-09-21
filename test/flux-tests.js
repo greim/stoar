@@ -55,7 +55,7 @@ describe('flux', function(){
     var s1 = d.store({ foo: 1 }, function(action, payload){
       s1.set('foo', 2)
       assert.strictEqual(s1.get('foo'), 2)
-      this.waitFor(s2)
+      d.waitFor(s2)
     })
     c.send('foo','bar')
   })
@@ -65,7 +65,7 @@ describe('flux', function(){
     var c = d.commander()
     var s2 = d.store({ bar: 1 }, function(action, payload){})
     var s1 = d.store({ foo: 1 }, function(action, payload){
-      this.waitFor(s2)
+      d.waitFor(s2)
       s1.set('foo', 2)
       assert.strictEqual(s1.get('foo'), 2)
       done()
@@ -80,7 +80,7 @@ describe('flux', function(){
     var s1 = d.store({ foo: 1 }, function(action, payload){
       s1.set('foo', 2)
       assert.strictEqual(s1.get('foo'), 2)
-      this.waitFor(s2)
+      d.waitFor(s2)
       done()
     })
     c.send('foo','bar')

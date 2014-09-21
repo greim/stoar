@@ -49,6 +49,16 @@ describe('commander', function(){
     })
     cdr.foo()
   })
+
+  it('should be this in itself', function(){
+    var dsp = Stoar.dispatcher()
+    var cdr = dsp.commander({
+      foo: function(){
+        assert.strictEqual(this, cdr)
+      }
+    })
+    cdr.foo()
+  })
 })
 
 
