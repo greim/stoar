@@ -24,6 +24,9 @@ var makeDef = (function(){
     }
   }
   return function(prop, def){
+    if (!def.hasOwnProperty('value') && !def.hasOwnProperty('type') && !def.hasOwnProperty('validate')){
+      throw new Error('invalid property definition')
+    }
     def = _.extend({
       type: 'item', // 'item', 'map', 'list'
       validate: function(){}
@@ -51,7 +54,7 @@ function Store(args){
   var defs = this._defs = {}
   _.each(args, function(def, prop){
     if (isImmutable(def)){
-      def = {value:def}
+      def = {type:'item',value:def}
     }
     defs[prop] = makeDef(prop, def)
   })
