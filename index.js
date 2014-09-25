@@ -90,6 +90,10 @@ _.extend(Store.prototype, {
 
   hasProperty: function(prop){
     return this._defs.hasOwnProperty(prop)
+  },
+
+  absorb: function(payload){
+    this[payload.method].apply(this, payload.args)
   }
 })
 
@@ -175,6 +179,9 @@ _.extend(Dispatcher.prototype, {
     commander.on('action', _.bind(function(action, payload){
       this._dispatch(action, payload)
     }, this))
+    commander.on('_mutate', _.bind(function(args, store){
+      this._dispatch('mutate', args, store)
+    }, this))
     return commander
   },
 
@@ -205,16 +212,18 @@ _.extend(Dispatcher.prototype, {
     }
   },
 
-  _dispatch: function(action, payload){
+  _dispatch: function(action, payload, targetStore){
     this._action = action
     this._payload = payload
     this._running = {}
     this._ran = {}
     for (var i=0; i<this._jobs.length; i++){
       var job = this._jobs[i]
-      this._activeStore = job.store
-      this._run(job)
-      delete this._activeStore
+      if (!targetStore || targetStore === job.store){
+        this._activeStore = job.store
+        this._run(job)
+        delete this._activeStore
+      }
     }
     delete this._action
     delete this._payload
@@ -248,6 +257,17 @@ util.inherits(Commander, EventEmitter)
 _.extend(Commander.prototype, {
   send: function(action, payload){
     this.emit('action', action, payload)
+  }
+})
+
+_.each(mutFuncNames, function(funcName){
+  Commander.prototype[funcName] = function(store){
+    var args = Array.prototype.slice.call(arguments)
+    args.shift()
+    this.emit('_mutate', {
+      method: funcName,
+      args: args
+    }, store)
   }
 })
 

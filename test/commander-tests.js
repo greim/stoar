@@ -59,6 +59,29 @@ describe('commander', function(){
     })
     cdr.foo()
   })
+
+  it('should proxy store mutators', function(){
+    var dsp = Stoar.dispatcher()
+    var cdr = dsp.commander()
+    var store = dsp.store({foo:1}, function(action, payload){
+      if (action === 'mutate'){
+        this.absorb(payload)
+      }
+    })
+    cdr.set(store, 'foo', 2)
+    assert.strictEqual(store.get('foo'), 2)
+  })
+
+  it('should proxy store mutators only to the given store', function(done){
+    var dsp = Stoar.dispatcher()
+    var cdr = dsp.commander()
+    var store1 = dsp.store({foo:1}, function(){})
+    var store2 = dsp.store({foo:1}, function(){
+      done(new Error('wrong store'))
+    })
+    cdr.set(store1, 'foo', 2)
+    done()
+  })
 })
 
 
