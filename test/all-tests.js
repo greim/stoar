@@ -1061,6 +1061,59 @@ describe('lists', function(){
         assert.deepEqual(r,[1,2,0,2,undefined,1])
       })
     })
+
+    it('should truncate length', function(){
+      testStore({
+        names: {type:'list',value:[1,2,3]}
+      }, function(store){
+        store.truncateLength('names', 2)
+        assert.deepEqual(store.getAll('names'), [1,2])
+      })
+    })
+
+    it('should ignore too-high truncation lengths', function(){
+      testStore({
+        names: {type:'list',value:[1,2]}
+      }, function(store){
+        store.truncateLength('names', 5)
+        assert.deepEqual(store.getAll('names'), [1,2])
+      })
+    })
+
+    it('should not trigger change for too-high truncation lengths', function(){
+      testStore({
+        names: {type:'list',value:[1,2]}
+      }, function(store){
+        store.on('change', function(){
+          throw new Error('invalid change event')
+        })
+        store.truncateLength('names', 5)
+      })
+    })
+
+    it('should truncate length using mutables', function(){
+      var o1 = {}
+        ,o2 = {}
+        ,o3 = {}
+      testStore({
+        names: {type:'list',value:[o1,o2,o3]}
+      }, function(store){
+        store.truncateLength('names', 2)
+      })
+    })
+
+    it('should change on truncating length', function(done){
+      testStore({
+        names: {type:'list',value:[1,2,3]}
+      }, function(store){
+        store.on('change', function(prop, ch){
+          assert.strictEqual(ch.oldVal, 3)
+          assert.strictEqual(ch.newVal, undefined)
+          done()
+        })
+        store.truncateLength('names', 2)
+      })
+    })
   })
 })
 
