@@ -203,6 +203,7 @@ var deepClone = store.clone('stuff', true);
  * `store.unshift(prop, val)` - Prepends a value.
  * `store.pop(prop)` - Removes and returns the last value.
  * `store.shift(prop)` - Removes and returns the first value.
+ * `store.truncateLength(prop, length)` - Limits length of list to `length`. If `length` is bigger, becomes a no-op.
  * `store.get(prop, idx)` - Returns the value at the given index.
  * `store.clone(prop, idx, isDeep)` - Clone the value at the given index.
  * `store.length(prop)` - Returns the length.
