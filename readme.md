@@ -165,12 +165,16 @@ var deepClone = store.clone('stuff', true);
 
  * `var disp = Stoar.dispatcher()` - Create a dispatcher.
 
-## Dispatcher API
+### Dispatcher API
 
  * `var store = dispatcher.store(defs, actionCallback)` - Create a store. `defs` is an object describing the store's data. `actionCallback` is a callback that receives a signature `(action, payload)` for whenever the dispatcher receives a command, or an object keyed by action names and whose values are functions receiving a `(payload)` signature.
  * `var commander = dispatcher.commander(methods)` - Create a commander. `methods` is an object containing any custom method you'd like to have on the created commander.
  * `var notifier = dispatcher.notifier()` - Create a notifier.
  * `dispatcher.waitFor(store)` - Call this synchronously from within a store's action callback. Causes another store to be updated first.
+
+### Store
+
+ * `store.absorb(payload)` - Convenience method to apply a `mutate` action directly. Can only be called synchronously from within an action callback. (See commander API below).
 
 ### Items
 
@@ -225,14 +229,15 @@ In old browsers you may need to polyfill `Array.prototype` in order for these to
  * `store.indexOf(prop, ...)`
  * `store.lastIndexOf(prop, ...)`
 
-## Commander API
+### Commander API
 
  * `commander.send(action, payload)` - Send an action directly to the dispatcher.
  * `commander.myCustomMethod(any, args)` - Call a custom method that you provided when creating the commander.
+ * `commander[mutatorMethod](store, ...args`) - Proxy for any store mutator method. Stores can't be mutated outside of their action callbacks. This therefore translates into an action called `mutate` which is passed to the given store. The payload contains the arguments passed to the commander, except with `store` shifted off the list. For convenience, in the action callback, you can do `if (action === 'mutate') { this.absorb(payload) }` in order to apply mutations directly.
 
-## Notifier API
+### Notifier API
 
- * `notifier.on('change', callback)` - Listen for changes to any of the stores that have been registered with the dispatcher.
+ * `notifier.on('change', callback)` - Listen for changes to any of the stores that have been registered with the dispatcher. `callback` is passed a signature `(store, property, change)`, where `change` is an object like `{ oldVal: something, newVal: something }`. If the changed property was a list or map, `change` will also contain `index` or `key`, respectively.
 
 
 
