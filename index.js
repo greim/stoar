@@ -105,8 +105,8 @@ _.each(accFuncNames, function(funcName){
     var def = this._defs[prop]
       ,type = def.type
       ,funcs = funcsByType[type].accessors
-    if (!funcs){
-      throw new Error(util.format('no such method for %s types', type))
+    if (!funcs[funcName]){
+      throw new Error(util.format('no such method "%s" for %s types', funcName, type))
     } else {
       var args = Array.prototype.slice.call(arguments)
       args[0] = def
@@ -126,8 +126,8 @@ _.each(mutFuncNames, function(funcName){
     var def = this._defs[prop]
       ,type = def.type
       ,funcs = funcsByType[type].mutators
-    if (!funcs){
-      throw new Error(util.format('no such method for %s types', type))
+    if (!funcs[funcName]){
+      throw new Error(util.format('no such method "%s" for %s types', funcName, type))
     } else {
       var args = Array.prototype.slice.call(arguments)
       args[0] = def

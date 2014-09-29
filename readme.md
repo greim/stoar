@@ -176,42 +176,42 @@ var deepClone = store.clone('stuff', true);
 
  * `store.absorb(payload)` - Convenience method to apply a `mutate` action directly. Can only be called synchronously from within an action callback. (See commander API below).
 
-### Items
+### Item accessors
 
- * `store.set(prop, val)` - Updates the item to the given value.
- * `store.unset(prop)` - Sets the item to undefined.
  * `store.get(prop)` - Returns the item.
  * `store.clone(prop, [isDeep])` - Returns a clone of the item.
 
-### Maps
+### Item mutators
 
- * `store.set(prop, key, val)` - Updates the value at the given key.
- * `store.unset(prop, key)` - Deletes the value at the given key.
- * `store.setAll(prop, newMap)` - Merges in the new values.
- * `store.resetAll(prop, newMap)` - Overwrites the map with the new values.
- * `store.clear(prop)` - Empties out the map.
+ * `store.set(prop, val)` - Updates the item to the given value.
+ * `store.unset(prop)` - Sets the item to undefined.
+
+### Map accessors
+
  * `store.get(prop, key)` - Returns the value at the given key.
  * `store.clone(prop, isDeep)` - Clone the value at the given key.
  * `store.has(prop, key)` - Returns true if the map has the given key as an own property.
  * `store.getAll(prop)` - Returns a copy of the map. Modifying the copy will not change the map.
  * `store.keys(prop)` - Returns an array of map keys.
  * `store.values(prop)` - Returns an array of map values.
- * `store.forEach(prop, cb, [ctx])` - Iterate the map. `cb` is passed `value` and `name` params.
+ * `store.forEach(prop, cb, [ctx])` - Iterate the map. `cb` is passed signature `(value, name)`.
+ * `store.isIdentical(prop, otherMap)` - Test whether the top-level contents of a different object are identical using `===`.
 
-### Lists
+### Map mutators
 
- * `store.set(prop, idx, val)` - Updates the value at the given index.
- * `store.resetAll(prop, newList)` - Overwrites the list with the new values.
- * `store.clear(prop)` - Empties out the list.
- * `store.push(prop, val)` - Appends a value.
- * `store.unshift(prop, val)` - Prepends a value.
- * `store.pop(prop)` - Removes and returns the last value.
- * `store.shift(prop)` - Removes and returns the first value.
- * `store.truncateLength(prop, length)` - Limits length of list to `length`. If `length` is bigger, becomes a no-op.
+ * `store.set(prop, key, val)` - Updates the value at the given key.
+ * `store.unset(prop, key)` - Deletes the value at the given key.
+ * `store.setAll(prop, newMap)` - Merges in the new values.
+ * `store.resetAll(prop, newMap)` - Overwrites the map with the new values.
+ * `store.clear(prop)` - Empties out the map.
+
+### List accessors
+
  * `store.get(prop, idx)` - Returns the value at the given index.
  * `store.clone(prop, idx, isDeep)` - Clone the value at the given index.
  * `store.length(prop)` - Returns the length.
  * `store.getAll(prop)` - Returns a copy of the list. Modifying the copy will not change the list.
+ * `store.isIdentical(prop, otherList)` - Test whether the top-level contents of a different list are identical using `===`.
 
 All of these are strictly accessors and call directly into the `Array.prototype` method of the same name, but with `prop` shifted off the args.
 In old browsers you may need to polyfill `Array.prototype` in order for these to work.
@@ -228,6 +228,17 @@ In old browsers you may need to polyfill `Array.prototype` in order for these to
  * `store.concat(prop, ...)`
  * `store.indexOf(prop, ...)`
  * `store.lastIndexOf(prop, ...)`
+
+### Lists mutators
+
+ * `store.set(prop, idx, val)` - Updates the value at the given index.
+ * `store.resetAll(prop, newList)` - Overwrites the list with the new values.
+ * `store.clear(prop)` - Empties out the list.
+ * `store.push(prop, val)` - Appends a value.
+ * `store.unshift(prop, val)` - Prepends a value.
+ * `store.pop(prop)` - Removes and returns the last value.
+ * `store.shift(prop)` - Removes and returns the first value.
+ * `store.truncateLength(prop, length)` - Limits length of list to `length`. If `length` is bigger, becomes a no-op.
 
 ### Commander API
 

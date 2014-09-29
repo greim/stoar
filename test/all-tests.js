@@ -472,6 +472,34 @@ describe('maps', function(){
         assert.strictEqual(that, this)
       }, that)
     })
+
+    it('should test if a map is identical', function(){
+      var store = disp.store({
+        flags: {
+          type: 'map',
+          value: {
+            foo:true,
+            bar:false
+          }
+        }
+      })
+      assert.strictEqual(store.isIdentical('flags', store.getAll('flags')), true)
+    })
+
+    it('should test if a map is not identical', function(){
+      var store = disp.store({
+        flags: {
+          type: 'map',
+          value: {
+            foo:true,
+            bar:false
+          }
+        }
+      })
+      assert.strictEqual(store.isIdentical('flags', {foo:true,bar:false,baz:true}), false, 'superset failed')
+      assert.strictEqual(store.isIdentical('flags', {foo:true}), false, 'subset failed')
+      assert.strictEqual(store.isIdentical('flags', {foo:true,bar:true}), false, 'differing set')
+    })
   })
 
   describe('mutators', function(){
@@ -851,6 +879,22 @@ describe('lists', function(){
         names: {type:'list',value:[4,3,2]}
       })
       assert.strictEqual(st.indexOf('names',3), 1)
+    })
+
+    it('should test if a list is identical', function(){
+      var st = disp.store({
+        names: {type:'list',value:[4,3,2]}
+      })
+      assert.strictEqual(st.isIdentical('names', st.getAll('names')), true)
+    })
+
+    it('should test if a list is not identical', function(){
+      var st = disp.store({
+        names: {type:'list',value:[4,3,2]}
+      })
+      assert.strictEqual(st.isIdentical('names', [4,3,2,1]), false, 'superset failed')
+      assert.strictEqual(st.isIdentical('names', [4,3]), false, 'subset failed')
+      assert.strictEqual(st.isIdentical('names', [4,3,1]), false, 'differing set failed')
     })
   })
 
