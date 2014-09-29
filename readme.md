@@ -96,13 +96,6 @@ commander.doCustomThing(); // custom method might have side effects
 ...
 ```
 
-## Where to do data fetches?
-
-**Stores must be mutated synchronously in their action callbacks.**
-
-Asynchronous mutations would thus be forced to re-run the callback by calling the commander again.
-Therefore, data fetches make most sense to happen from commander logic in the first place.
-
 ## Stores
 
 ```js
@@ -167,7 +160,7 @@ var deepClone = store.clone('stuff', true);
 
 ### Dispatcher API
 
- * `var store = dispatcher.store(defs, actionCallback)` - Create a store. `defs` is an object describing the store's data. `actionCallback` is a callback that receives a signature `(action, payload)` for whenever the dispatcher receives a command, or an object keyed by action names and whose values are functions receiving a `(payload)` signature.
+ * `var store = dispatcher.store(defs, actionCallback)` - Create a store. `defs` is an object describing the store's data. `actionCallback` is a callback that receives a signature `(action, payload)` for whenever the dispatcher receives a command, or an object keyed by action names and whose values are functions receiving an `(action, payload)` signature.
  * `var commander = dispatcher.commander(methods)` - Create a commander. `methods` is an object containing any custom method you'd like to have on the created commander.
  * `var notifier = dispatcher.notifier()` - Create a notifier.
  * `dispatcher.waitFor(store)` - Call this synchronously from within a store's action callback. Causes another store to be updated first.
