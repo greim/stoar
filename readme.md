@@ -197,6 +197,7 @@ var deepClone = store.clone('stuff', true);
  * `store.unset(prop, key)` - Deletes the value at the given key.
  * `store.setAll(prop, newMap)` - Merges in the new values.
  * `store.resetAll(prop, newMap)` - Overwrites the map with the new values.
+ * `store.setExistingValuesTo(prop, val)` - Sets each existing map value to `val`. Leaves keys unchanged.
  * `store.clear(prop)` - Empties out the map.
  * `store.toggle(prop, key)` - Inverts the value in place using `!`.
 
@@ -228,6 +229,7 @@ In old browsers you may need to polyfill `Array.prototype` in order for these to
 
  * `store.set(prop, idx, val)` - Updates the value at the given index.
  * `store.resetAll(prop, newList)` - Overwrites the list with the new values.
+ * `store.setExistingValuesTo(prop, val)` - Sets each existing list value to `val`. Array length unchanged.
  * `store.clear(prop)` - Empties out the list.
  * `store.push(prop, val)` - Appends a value.
  * `store.unshift(prop, val)` - Prepends a value.

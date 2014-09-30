@@ -264,6 +264,21 @@ describe('lists', function(){
       })
     })
 
+    it('should setExistingValuesTo', function(){
+      testStore({
+        flags: {
+          type: 'list',
+          value: [
+            true,
+            false
+          ]
+        }
+      }, function(store){
+        store.setExistingValuesTo('flags', 1)
+        assert.deepEqual(store.getAll('flags'),[1,1])
+      })
+    })
+
     it('should clear', function(){
       testStore({
         names: {type:'list',value:[2,3,4]}

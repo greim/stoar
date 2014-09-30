@@ -453,6 +453,34 @@ describe('maps', function(){
       })
     })
 
+    it('should not corrupt value on resetAll', function(){
+      testStore({
+        foo:{
+          type: 'map',
+          value: {a:1}
+        }
+      }, function(store){
+        store.resetAll('foo', null)
+        store.set('foo','x',3)
+        assert.strictEqual(store.get('foo','x'), 3)
+      })
+    })
+
+    it('should setExistingValuesTo', function(){
+      testStore({
+        flags: {
+          type: 'map',
+          value: {
+            foo:true,
+            bar:false
+          }
+        }
+      }, function(store){
+        store.setExistingValuesTo('flags', 1)
+        assert.deepEqual(store.getAll('flags'),{foo:1,bar:1})
+      })
+    })
+
     it('should clear', function(){
       testStore({
         flags: {
