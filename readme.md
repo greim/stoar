@@ -178,6 +178,7 @@ var deepClone = store.clone('stuff', true);
 
  * `store.set(prop, val)` - Updates the item to the given value.
  * `store.unset(prop)` - Sets the item to undefined.
+ * `store.toggle(prop)` - Inverts the value in place using `!`.
 
 ### Map accessors
 
@@ -197,6 +198,7 @@ var deepClone = store.clone('stuff', true);
  * `store.setAll(prop, newMap)` - Merges in the new values.
  * `store.resetAll(prop, newMap)` - Overwrites the map with the new values.
  * `store.clear(prop)` - Empties out the map.
+ * `store.toggle(prop, key)` - Inverts the value in place using `!`.
 
 ### List accessors
 
@@ -232,6 +234,7 @@ In old browsers you may need to polyfill `Array.prototype` in order for these to
  * `store.pop(prop)` - Removes and returns the last value.
  * `store.shift(prop)` - Removes and returns the first value.
  * `store.truncateLength(prop, length)` - Limits length of list to `length`. If `length` is bigger, becomes a no-op.
+ * `store.toggle(prop, idx)` - Inverts the value in place using `!`.
 
 ### Commander API
 
