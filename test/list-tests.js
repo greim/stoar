@@ -254,6 +254,16 @@ describe('lists', function(){
       })
     })
 
+    it('resetAll should reject non-arrays', function(){
+      testStore({
+        names: {type:'list',value:[],validate:function(x){if(!x)throw 'bad'}}
+      }, function(store){
+        assert.throws(function(){
+          store.resetAll('names','foo')
+        }, /reset list must be an array/)
+      })
+    })
+
     it('should clear', function(){
       testStore({
         names: {type:'list',value:[2,3,4]}
