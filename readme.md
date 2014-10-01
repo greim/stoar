@@ -229,7 +229,7 @@ In old browsers you may need to polyfill `Array.prototype` in order for these to
 
  * `store.set(prop, idx, val)` - Updates the value at the given index.
  * `store.resetAll(prop, newList)` - Overwrites the list with the new values.
- * `store.fill(prop, val, [len])` - Sets each existing list value to `val`. If `len` is given, list length is changed.
+ * `store.populate(prop, val, [len])` - Populate list with `val`. If `len` is given, list length is changed.
  * `store.clear(prop)` - Empties out the list.
  * `store.push(prop, val)` - Appends a value.
  * `store.unshift(prop, val)` - Prepends a value.

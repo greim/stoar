@@ -264,7 +264,7 @@ describe('lists', function(){
       })
     })
 
-    it('should fill', function(){
+    it('should populate', function(){
       testStore({
         flags: {
           type: 'list',
@@ -274,12 +274,12 @@ describe('lists', function(){
           ]
         }
       }, function(store){
-        store.fill('flags', 1)
+        store.populate('flags', 1)
         assert.deepEqual(store.getAll('flags'),[1,1])
       })
     })
 
-    it('should fill bigger length', function(){
+    it('should populate bigger length', function(){
       testStore({
         flags: {
           type: 'list',
@@ -289,12 +289,12 @@ describe('lists', function(){
           ]
         }
       }, function(store){
-        store.fill('flags', 1, 3)
+        store.populate('flags', 1, 3)
         assert.deepEqual(store.getAll('flags'),[1,1,1])
       })
     })
 
-    it('should fill smaller length', function(){
+    it('should populate smaller length', function(){
       testStore({
         flags: {
           type: 'list',
@@ -304,7 +304,7 @@ describe('lists', function(){
           ]
         }
       }, function(store){
-        store.fill('flags', 1, 1)
+        store.populate('flags', 1, 1)
         assert.deepEqual(store.getAll('flags'),[1])
       })
     })
