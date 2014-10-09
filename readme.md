@@ -237,6 +237,7 @@ In old browsers you may need to polyfill `Array.prototype` in order for these to
  * `store.shift(prop)` - Removes and returns the first value.
  * `store.truncateLength(prop, length)` - Limits length of list to `length`. If `length` is bigger, becomes a no-op.
  * `store.toggle(prop, idx)` - Inverts the value in place using `!`.
+ * `store.splice(prop, ...)` - Splice the list in-place. Args are pass directly to `Array.prototype.splice`, with `prop` shifted off the front.
 
 ### Commander API
 

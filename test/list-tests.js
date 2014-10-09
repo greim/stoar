@@ -220,6 +220,32 @@ describe('lists', function(){
       })
     })
 
+    it('should splice', function(){
+      testStore({
+        names: {type:'list',value:[0,1,2,3,4,5]}
+      }, function(store){
+        store.splice('names', 1, 2)
+        assert.deepEqual(store.getAll('names'),[0,3,4,5])
+      })
+    })
+
+    it('should change on splice', function(){
+      testStore({
+        names: {type:'list',value:[0,1,2,3]}
+      }, function(store){
+        var r = []
+        store.on('change',function(prop,ch){
+          assert.strictEqual(prop,'names')
+          r.push(ch.oldVal,ch.newVal,ch.index)
+        })
+        store.splice('names',2,1)
+        assert.deepEqual(r,[
+          2,3,2,
+          3,undefined,3
+        ])
+      })
+    })
+
     it('should resetAll', function(){
       testStore({
         names: {type:'list',value:[1,2]}
@@ -240,6 +266,14 @@ describe('lists', function(){
         })
         store.resetAll('names',[3])
         assert.deepEqual(r,[1,3,0,2,undefined,1])
+      })
+    })
+
+    it('should not enforce no mutable sameness on resetAll', function(){
+      testStore({
+        names: {type:'list',value:[{},{}]}
+      }, function(store){
+        store.resetAll('names', store.getAll('names'))
       })
     })
 
