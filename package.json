@@ -1,10 +1,14 @@
 {
   "name": "stoar",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Flux architecture",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/greim/stoar.git"
   },
   "keywords": [
     "flux",
