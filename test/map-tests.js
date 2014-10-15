@@ -49,6 +49,23 @@ describe('maps', function(){
       assert.strictEqual(store.get('foo', 'a'), 1)
     })
 
+    it('should get loadable', function(){
+      var st = disp.store({
+        numbers: {type:'map',value:{foo:1,bar:2},loadable:true}
+      })
+      var loadable = st.getLoadable('numbers', 'foo')
+      assert.deepEqual(loadable, {value:1,status:undefined,timestamp:undefined,loading:undefined})
+    })
+
+    it('should get loadable only on loadables', function(){
+      var st = disp.store({
+        numbers: {type:'map',value:{foo:1,bar:2}}
+      })
+      assert.throws(function(){
+        st.getLoadable('numbers', 'foo')
+      }, /loadable/)
+    })
+
     it('should get undefined', function(){
       var store = disp.store({
         foo:{
@@ -132,6 +149,26 @@ describe('maps', function(){
         }
       })
       assert.deepEqual(store.getAll('flags'),{foo:true})
+    })
+
+    it('should getAllLoadables', function(){
+      var st = disp.store({
+        names: {type:'map',value:{foo:1,bar:2},loadable:true}
+      })
+      var loadables = st.getAllLoadables('names')
+      assert.deepEqual(loadables, {
+        foo:{value:1,loading:undefined,timestamp:undefined,status:undefined},
+        bar:{value:2,loading:undefined,timestamp:undefined,status:undefined}
+      })
+    })
+
+    it('should getAllLoadables only on loadables', function(){
+      var st = disp.store({
+        names: {type:'map',value:{}}
+      })
+      assert.throws(function(){
+        st.getAllLoadables('names')
+      }, /loadable/)
     })
 
     it('getAll should copy', function(){

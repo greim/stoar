@@ -67,6 +67,19 @@ describe('items', function(){
       assert.ok(obj.blah !== obj2.blah)
       assert.deepEqual(obj, obj2)
     })
+
+    it('should get loadable', function(){
+      var store = disp.store({ foo:{value:1,loadable:true} })
+      var loadable = store.getLoadable('foo')
+      assert.deepEqual(loadable, {value:1,status:undefined,timestamp:undefined,loading:undefined})
+    })
+
+    it('should get loadable only on loadables', function(){
+      var store = disp.store({ foo:{value:1} })
+      assert.throws(function(){
+        store.getLoadable('foo')
+      }, /loadable/)
+    })
   })
 
   describe('mutators', function(){

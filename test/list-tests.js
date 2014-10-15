@@ -39,6 +39,23 @@ describe('lists', function(){
       assert.strictEqual(st.get('names', 0), 'zz')
     })
 
+    it('should get loadable', function(){
+      var st = disp.store({
+        names: {type:'list',value:['a','b'],loadable:true}
+      })
+      var loadable = st.getLoadable('names', 0)
+      assert.deepEqual(loadable, {value:'a',status:undefined,timestamp:undefined,loading:undefined})
+    })
+
+    it('should get loadable only on loadables', function(){
+      var st = disp.store({
+        names: {type:'list',value:['a','b']}
+      })
+      assert.throws(function(){
+        st.getLoadable('names', 0)
+      }, /loadable/)
+    })
+
     it('should get undefined', function(){
       var st = disp.store({
         names: {type:'list',value:[]}
@@ -68,6 +85,26 @@ describe('lists', function(){
         names: {type:'list',value:[2,3,4]}
       })
       assert.deepEqual(st.getAll('names'),[2,3,4])
+    })
+
+    it('should getAllLoadables', function(){
+      var st = disp.store({
+        names: {type:'list',value:[2,3],loadable:true}
+      })
+      var loadables = st.getAllLoadables('names')
+      assert.deepEqual(loadables, [
+        {value:2,loading:undefined,timestamp:undefined,status:undefined},
+        {value:3,loading:undefined,timestamp:undefined,status:undefined}
+      ])
+    })
+
+    it('should getAllLoadables only on loadables', function(){
+      var st = disp.store({
+        names: {type:'list',value:['a','b']}
+      })
+      assert.throws(function(){
+        st.getAllLoadables('names')
+      }, /loadable/)
     })
 
     it('should getAll copy', function(){
