@@ -98,9 +98,13 @@ _.extend(Store.prototype, {
 })
 
 _.each(accFuncNames, function(funcName){
+  var isLoadable = /Loadables?$/.test(funcName)
   Store.prototype[funcName] = function(prop){
     if (!this._defs.hasOwnProperty(prop)){
       throw new Error(util.format('no property in store: %s', prop))
+    }
+    if (isLoadable && !this._defs[prop].loadable){
+      throw new Error(util.format('not loadable: %s', prop))
     }
     var def = this._defs[prop]
       ,type = def.type

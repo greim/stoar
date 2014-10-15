@@ -172,6 +172,7 @@ var deepClone = store.clone('stuff', true);
 ### Item accessors
 
  * `store.get(prop)` - Returns the item.
+ * `store.getLoadable(prop)` - Returns a composite object representing loadable info: `{value:*,loading:*,timestamp:*,status:*}`
  * `store.clone(prop, [isDeep])` - Returns a clone of the item.
 
 ### Item mutators
@@ -183,9 +184,11 @@ var deepClone = store.clone('stuff', true);
 ### Map accessors
 
  * `store.get(prop, key)` - Returns the value at the given key.
+ * `store.getLoadable(prop, key)` - Returns a composite object representing loadable info: `{value:*,loading:*,timestamp:*,status:*}`
  * `store.clone(prop, isDeep)` - Clone the value at the given key.
  * `store.has(prop, key)` - Returns true if the map has the given key as an own property.
  * `store.getAll(prop)` - Returns a copy of the map. Modifying the copy will not change the map.
+ * `store.getAllLoadables(prop)` - Returns a keyed map of composite objects (see `getLoadable()`).
  * `store.keys(prop)` - Returns an array of map keys.
  * `store.values(prop)` - Returns an array of map values.
  * `store.forEach(prop, cb, [ctx])` - Iterate the map. `cb` is passed signature `(value, name)`.
@@ -204,9 +207,11 @@ var deepClone = store.clone('stuff', true);
 ### List accessors
 
  * `store.get(prop, idx)` - Returns the value at the given index.
+ * `store.getLoadable(prop, idx)` - Returns a composite object representing loadable info: `{value:*,loading:*,timestamp:*,status:*}`
  * `store.clone(prop, idx, isDeep)` - Clone the value at the given index.
  * `store.length(prop)` - Returns the length.
  * `store.getAll(prop)` - Returns a copy of the list. Modifying the copy will not change the list.
+ * `store.getAllLoadables(prop)` - Returns a list of composite objects (see `getLoadable()`).
  * `store.isIdentical(prop, otherList)` - Test whether the top-level contents of a different list are identical using `===`.
 
 All of these are strictly accessors and call directly into the `Array.prototype` method of the same name, but with `prop` shifted off the args.
@@ -237,7 +242,7 @@ In old browsers you may need to polyfill `Array.prototype` in order for these to
  * `store.shift(prop)` - Removes and returns the first value.
  * `store.truncateLength(prop, length)` - Limits length of list to `length`. If `length` is bigger, becomes a no-op.
  * `store.toggle(prop, idx)` - Inverts the value in place using `!`.
- * `store.splice(prop, ...)` - Splice the list in-place. Args are pass directly to `Array.prototype.splice`, with `prop` shifted off the front.
+ * `store.splice(prop, ...)` - Splice the list in-place. Internally, args are passed directly to `Array.prototype.splice`, with `prop` shifted off the front.
 
 ### Commander API
 
