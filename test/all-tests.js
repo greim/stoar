@@ -189,7 +189,12 @@ describe('immutable', function(){
 
   it('should not change on immutable sameness function', function(){
     var fn = function(){}
-    testStore({foo:fn}, function(store){
+    testStore({
+      foo:{
+        type: 'item',
+        value: fn
+      }
+    }, function(store){
       store.on('change', function(){
         throw new Error('oops')
       })
