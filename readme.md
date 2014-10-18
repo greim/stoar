@@ -5,7 +5,7 @@ It provides you with:
 
  * **Dispatcher** - An object that mediates data flow to and from your stores. This is the central hub of your Flux app.
  * **Store** - A container for application state.
- * **Commander** - The entry point where data flows into the stores.
+ * **Commander** - The entry point where data flows into the dispatcher.
  * **Notifier** - The exit point where data flows out of the stores.
 
 ```sh
@@ -100,25 +100,30 @@ commander.doCustomThing(); // custom method might have side effects
 
 ```js
 var store = Stoar.store({
-  count: {
+  isFloating: {
     type: 'item',
-    value: 0
+    value: false
   },
   foods: {
     type: 'list',
     value: ['pizza','salad','eggs']
+  },
+  hasFood: function(food){
+    var foods = this.getAll('foods');
+    return foods.indexOf(food) !== -1;
   }
 });
 
-var count = store.get('count')
+var isFloating = store.get('isFloating')
 var firstFood = store.get('foods', 0)
 store.forEach('foods', function(food){
   // ...
 });
 ```
 
-Two data items are defined in this store: `count` and `foods`.
-Each receives a definition, which is an object with `type`, `value` and `validate` properties.
+Two data items and one custom method are defined in this store.
+As you might have guessed, the data items are `isFloating` and `foods` and the method is `hasFood`.
+Each data item consists of a definition, which is an object with `type`, `value` and `validate` properties.
 
   * **type** - Possible values include: `item`, `map`, and `list`. Optional; defaults to `item`. The `type` determines what kinds of operations are available on this store property.
   * **value** - The initial content of this property in the store. If `type === 'map`, this must be a plain object. If `type === 'list'`, this must be an array. This is optional, with a default value depending on `type`.
@@ -128,7 +133,9 @@ Each receives a definition, which is an object with `type`, `value` and `validat
 ## Immutability and Cloning
 
 JS objects aren't immutable, but treating them as such makes many things easier.
-Thus, stoar rejects resetting a mutable property to itself, and provides a `clone()` method that you can use instead of `get()` in order to treat objects as immutable.
+Thus, store objects are read-only.
+The only way to get data into a store is via the commander > dispatcher flow.
+Also, stoar rejects resetting a mutable property to itself, *even through the dispatcher*, and provides a `clone()` method that you can use instead of `get()` in order to treat objects as immutable.
 
 ```js
 var store = new Stoar({

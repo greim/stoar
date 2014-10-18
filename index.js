@@ -53,11 +53,17 @@ function Store(args){
   EventEmitter.call(this)
   var defs = this._defs = {}
   _.each(args, function(def, prop){
-    if (isImmutable(def)){
-      def = {type:'item',value:def}
+    if (typeof def === 'function'){
+      var method = def
+        ,name = prop
+      this[name] = _.bind(method, this)
+    } else {
+      if (isImmutable(def)){
+        def = {type:'item',value:def}
+      }
+      defs[prop] = makeDef(prop, def)
     }
-    defs[prop] = makeDef(prop, def)
-  })
+  }, this)
   _.each(_.keys(defs), function(prop){
     var def = defs[prop]
     if (def.loadable){
