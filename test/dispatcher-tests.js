@@ -80,6 +80,17 @@ describe('dispatcher', function(){
       dsp._dispatch('foo','bar')
     }, /cycle/)
   })
+
+  it('should fail on dispatch during dispatch', function(){
+    var dsp = Stoar.dispatcher()
+    var cmdr = dsp.commander()
+    var fooStore = dsp.store({foo:1}, function(action, payload){
+      cmdr.send('foo','bar')
+    })
+    assert.throws(function(){
+      cmdr.send('foo','bar')
+    }, /during/)
+  })
 })
 
 

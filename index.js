@@ -223,6 +223,9 @@ _.extend(Dispatcher.prototype, {
   },
 
   _dispatch: function(action, payload, targetStore){
+    if (this._running){
+      throw new Error('cannot dispatch during a dispatch')
+    }
     this._action = action
     this._payload = payload
     this._running = {}

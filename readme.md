@@ -16,18 +16,17 @@ It provides you with:
 var Stoar = require('stoar');
 ```
 
-## Building a basic Flux app
+## Building a simple Stoar Flux app
 
-Here are the things you do in order to build a Flux app.
 First, define your objects.
-These will be singletons which should be accessible to the rest of your code.
+These will be modules which can be required from the rest of your code.
 
- 1. Create a dispatcher.
+ 1. Create a dispatcher. Do this first; everything else comes from it.
  1. Create one or more stores from the dispatcher and provide action callbacks for each.
  1. Create a commander from the dispatcher, with optional custom methods.
  1. Create a notifier from the dispatcher.
 
-Next, wire up these objects.
+Next, compose these modules into an app.
 
  1. Listen for change events on the notifier, re-rendering your top-level React component(s) for each change. Do not listen for change events from anywhere but the top level components, as changes will propagate down via your render functions.
  1. Send actions to the commander in response to various events in your app, e.g. user-initiated, server-push, app initialize, window resize, polling/fetching, etc. Actions always have the signature `(action, payload)` where `action` is a string and `payload` is any value whatsoever.
