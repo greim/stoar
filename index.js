@@ -151,6 +151,7 @@ _.each(mutFuncNames, function(funcName){
 
 function Dispatcher(){
   this._jobs = []
+  this._stack = []
 }
 
 _.extend(Dispatcher.prototype, {
@@ -216,6 +217,15 @@ _.extend(Dispatcher.prototype, {
     }
   },
 
+  _getFromStack: function(prop){
+    var context = this._stack[this._stack.length - 1]
+    if (context){
+      return context[prop]
+    } else {
+      return undefined
+    }
+  },
+
   _propChange: function(store, prop, change){
     if (this._notifier){
       this._notifier.emit('change', store, prop, change)
@@ -223,37 +233,36 @@ _.extend(Dispatcher.prototype, {
   },
 
   _dispatch: function(action, payload, targetStore){
-    if (this._running){
-      throw new Error('cannot dispatch during a dispatch')
-    }
-    this._action = action
-    this._payload = payload
-    this._running = {}
-    this._ran = {}
+    // dispatches can trigger other dispatches,
+    // so need to keep a stack here
+    this._stack.push({
+      action: action,
+      payload: payload,
+      running: {},
+      ran: {}
+    })
     for (var i=0; i<this._jobs.length; i++){
       var job = this._jobs[i]
       if (!targetStore || targetStore === job.store){
+        var pendingActiveStore = this._activeStore
         this._activeStore = job.store
         this._run(job)
-        delete this._activeStore
+        this._activeStore = pendingActiveStore
       }
     }
-    delete this._action
-    delete this._payload
-    delete this._running
-    delete this._ran
+    this._stack.pop()
   },
 
   _run: function(job){
-    if (this._running[job.name]){
+    if (this._getFromStack('running')[job.name]){
       throw new Error(util.format('waitFor cycle in dispatcher'))
     }
-    if (!this._ran[job.name]){
-      this._running[job.name] = true
-      job.callback.call(job.store, this._action, this._payload)
-      delete this._running[job.name]
+    if (!this._getFromStack('ran')[job.name]){
+      this._getFromStack('running')[job.name] = true
+      job.callback.call(job.store, this._getFromStack('action'), this._getFromStack('payload'))
+      delete this._getFromStack('running')[job.name]
     }
-    this._ran[job.name] = true
+    this._getFromStack('ran')[job.name] = true
   }
 })
 
