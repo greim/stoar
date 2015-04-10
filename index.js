@@ -1,47 +1,56 @@
+/* ----------------------------------------------------------
+ * @license
+ * Copyright (c) 2014-2015 Greg Reimer <gregreimer@gmail.com>
+ * Available under MIT license (see LICENSE in repo)
+ * ----------------------------------------------------------
+ */
+
+'use strict'
+
 var _ = require('lodash')
-  ,EventEmitter = require('events').EventEmitter
-  ,util = require('util')
-  ,itemFuncs = require('./lib/item-functions')
-  ,mapFuncs = require('./lib/map-functions')
-  ,listFuncs = require('./lib/list-functions')
-  ,accFuncNames = _.keys(_.extend({}, itemFuncs.accessors, mapFuncs.accessors, listFuncs.accessors))
-  ,mutFuncNames = _.keys(_.extend({}, itemFuncs.mutators, mapFuncs.mutators, listFuncs.mutators))
-  ,funcsByType = {item:itemFuncs,map:mapFuncs,list:listFuncs}
-  ,isImmutable = require('./lib/is-immutable')
+  , EventEmitter = require('events').EventEmitter
+  , util = require('util')
+  , itemFuncs = require('./lib/item-functions')
+  , mapFuncs = require('./lib/map-functions')
+  , listFuncs = require('./lib/list-functions')
+  , accFuncNames = _.keys(_.extend({}, itemFuncs.accessors, mapFuncs.accessors, listFuncs.accessors))
+  , mutFuncNames = _.keys(_.extend({}, itemFuncs.mutators, mapFuncs.mutators, listFuncs.mutators))
+  , funcsByType = {item:itemFuncs,map:mapFuncs,list:listFuncs}
+  , isImmutable = require('./lib/is-immutable')
 
 // ======================================================
 // Store
 
-var makeDef = (function(){
+var makeDef = (function() {
   var validTypes = {item:1,map:1,list:1}
-  function getDefault(type){
-    if (type === 'item'){
+  function getDefault(type) {
+    if (type === 'item') {
       return undefined
-    } else if (type === 'map'){
+    } else if (type === 'map') {
       return {}
-    } else if (type === 'list'){
+    } else if (type === 'list') {
       return []
     }
   }
-  return function(prop, def){
-    if (!def.hasOwnProperty('value') && !def.hasOwnProperty('type') && !def.hasOwnProperty('validate')){
+  return function(prop, def) {
+    if (!def.hasOwnProperty('value') && !def.hasOwnProperty('type') && !def.hasOwnProperty('validate')) {
       throw new Error('invalid property definition')
     }
     def = _.extend({
       type: 'item', // 'item', 'map', 'list'
-      validate: function(){}
+      validate: function() {}
     }, def)
-    if (!def.hasOwnProperty('value')){
+    if (!def.hasOwnProperty('value')) {
       def.value = getDefault(def.type)
     }
-    if (!validTypes.hasOwnProperty(def.type)){
+    if (!validTypes.hasOwnProperty(def.type)) {
       throw new Error(util.format('invalid type: %s', def.type))
     }
     def.prop = prop
-    if (def.type === 'item'){
+    if (def.type === 'item') {
       def.validate(def.value)
     } else {
-      _.each(def.value, function(val){
+      _.each(def.value, function(val) {
         def.validate(val)
       })
     }
@@ -49,29 +58,29 @@ var makeDef = (function(){
   }
 })()
 
-function Store(args){
+function Store(args) {
   EventEmitter.call(this)
   var defs = this._defs = {}
-  _.each(args, function(def, prop){
-    if (typeof def === 'function'){
+  _.each(args, function(def, prop) {
+    if (typeof def === 'function') {
       var method = def
         ,name = prop
       this[name] = _.bind(method, this)
     } else {
-      if (isImmutable(def)){
+      if (isImmutable(def)) {
         def = {type:'item',value:def}
       }
       defs[prop] = makeDef(prop, def)
     }
   }, this)
-  _.each(_.keys(defs), function(prop){
+  _.each(_.keys(defs), function(prop) {
     var def = defs[prop]
-    if (def.loadable){
+    if (def.loadable) {
       _.each([
         prop+':loading',
         prop+':status',
         prop+':timestamp'
-      ], function(extraProp){
+      ], function(extraProp) {
         defs[extraProp] = makeDef(extraProp, {type:def.type})
       })
     }
@@ -82,40 +91,40 @@ util.inherits(Store, EventEmitter);
 
 _.extend(Store.prototype, {
 
-  _change: function(def, change){
+  _change: function(def, change) {
     var same = change.oldVal === change.newVal
       ,isMut = !isImmutable(change.newVal)
       ,allowMut = def.allowMutableValues
-    if (same && isMut && !allowMut){
+    if (same && isMut && !allowMut) {
       throw new Error('cannot set a mutable value to itself')
     }
-    if (!same || (isMut && allowMut)){
+    if (!same || (isMut && allowMut)) {
       this.emit('change', def.prop, change)
     }
   },
 
-  hasProperty: function(prop){
+  hasProperty: function(prop) {
     return this._defs.hasOwnProperty(prop)
   },
 
-  absorb: function(payload){
+  absorb: function(payload) {
     this[payload.method].apply(this, payload.args)
   }
 })
 
-_.each(accFuncNames, function(funcName){
+_.each(accFuncNames, function(funcName) {
   var isLoadable = /Loadables?$/.test(funcName)
-  Store.prototype[funcName] = function(prop){
-    if (!this._defs.hasOwnProperty(prop)){
+  Store.prototype[funcName] = function(prop) {
+    if (!this._defs.hasOwnProperty(prop)) {
       throw new Error(util.format('no property in store: %s', prop))
     }
-    if (isLoadable && !this._defs[prop].loadable){
+    if (isLoadable && !this._defs[prop].loadable) {
       throw new Error(util.format('not loadable: %s', prop))
     }
     var def = this._defs[prop]
       ,type = def.type
       ,funcs = funcsByType[type].accessors
-    if (!funcs[funcName]){
+    if (!funcs[funcName]) {
       throw new Error(util.format('no such method "%s" for %s types', funcName, type))
     } else {
       var args = Array.prototype.slice.call(arguments)
@@ -125,18 +134,18 @@ _.each(accFuncNames, function(funcName){
   }
 })
 
-_.each(mutFuncNames, function(funcName){
-  Store.prototype[funcName] = function(prop){
-    if (!this._defs.hasOwnProperty(prop)){
+_.each(mutFuncNames, function(funcName) {
+  Store.prototype[funcName] = function(prop) {
+    if (!this._defs.hasOwnProperty(prop)) {
       throw new Error(util.format('no property in store: %s', prop))
     }
-    if (this._dispatcher && this._dispatcher._activeStore !== this){
+    if (this._dispatcher && this._dispatcher._activeStore !== this) {
       throw new Error('cannot mutate a store outside a dispatcher cycle')
     }
     var def = this._defs[prop]
       ,type = def.type
       ,funcs = funcsByType[type].mutators
-    if (!funcs[funcName]){
+    if (!funcs[funcName]) {
       throw new Error(util.format('no such method "%s" for %s types', funcName, type))
     } else {
       var args = Array.prototype.slice.call(arguments)
@@ -149,20 +158,20 @@ _.each(mutFuncNames, function(funcName){
 // ======================================================
 // Dispatcher
 
-function Dispatcher(){
+function Dispatcher() {
   this._jobs = []
   this._stack = []
 }
 
 _.extend(Dispatcher.prototype, {
 
-  store: function(args, callback){
+  store: function(args, callback) {
     var store = new Store(args)
-    if (typeof callback !== 'function'){
+    if (typeof callback !== 'function') {
       var callbacks = callback
         ,self = this
-      callback = function(action, payload){
-        if (callbacks.hasOwnProperty(action)){
+      callback = function(action, payload) {
+        if (callbacks.hasOwnProperty(action)) {
           return callbacks[action].call(self, payload)
         }
       }
@@ -174,42 +183,42 @@ _.extend(Dispatcher.prototype, {
       store: store,
       callback: callback
     })
-    store.on('change', _.bind(function(prop, change){
+    store.on('change', _.bind(function(prop, change) {
       this._propChange(store, prop, change)
     }, this))
     store._dispatcher = this
     return store
   },
 
-  commander: function(methods){
-    if (this._createdCommander){
+  commander: function(methods) {
+    if (this._createdCommander) {
       throw new Error('a dispatcher cant create two commanders')
     }
     this._createdCommander = true
     var commander = new Commander(methods)
-    commander.on('action', _.bind(function(action, payload){
+    commander.on('action', _.bind(function(action, payload) {
       this._dispatch(action, payload)
     }, this))
-    commander.on('_mutate', _.bind(function(args, store){
+    commander.on('_mutate', _.bind(function(args, store) {
       this._dispatch('mutate', args, store)
     }, this))
     return commander
   },
 
-  notifier: function(){
-    if (this._notifier){
+  notifier: function() {
+    if (this._notifier) {
       throw new Error('a dispatcher cant create two commanders')
     }
     this._notifier = new Notifier()
     return this._notifier
   },
 
-  waitFor: function(store){
+  waitFor: function(store) {
     var name = store._name
     var pendingActiveStore = this._activeStore
-    for (var i=0; i<this._jobs.length; i++){
+    for (var i=0; i<this._jobs.length; i++) {
       var job = this._jobs[i]
-      if (job.name === name){
+      if (job.name === name) {
         this._activeStore = job.store
         this._run(job)
         this._activeStore = pendingActiveStore
@@ -217,22 +226,22 @@ _.extend(Dispatcher.prototype, {
     }
   },
 
-  _getFromStack: function(prop){
+  _getFromStack: function(prop) {
     var context = this._stack[this._stack.length - 1]
-    if (context){
+    if (context) {
       return context[prop]
     } else {
       return undefined
     }
   },
 
-  _propChange: function(store, prop, change){
-    if (this._notifier){
+  _propChange: function(store, prop, change) {
+    if (this._notifier) {
       this._notifier.emit('change', store, prop, change)
     }
   },
 
-  _dispatch: function(action, payload, targetStore){
+  _dispatch: function(action, payload, targetStore) {
     // dispatches can trigger other dispatches,
     // so need to keep a stack here
     this._stack.push({
@@ -241,9 +250,9 @@ _.extend(Dispatcher.prototype, {
       running: {},
       ran: {}
     })
-    for (var i=0; i<this._jobs.length; i++){
+    for (var i=0; i<this._jobs.length; i++) {
       var job = this._jobs[i]
-      if (!targetStore || targetStore === job.store){
+      if (!targetStore || targetStore === job.store) {
         var pendingActiveStore = this._activeStore
         this._activeStore = job.store
         this._run(job)
@@ -253,11 +262,11 @@ _.extend(Dispatcher.prototype, {
     this._stack.pop()
   },
 
-  _run: function(job){
-    if (this._getFromStack('running')[job.name]){
+  _run: function(job) {
+    if (this._getFromStack('running')[job.name]) {
       throw new Error(util.format('waitFor cycle in dispatcher'))
     }
-    if (!this._getFromStack('ran')[job.name]){
+    if (!this._getFromStack('ran')[job.name]) {
       this._getFromStack('running')[job.name] = true
       job.callback.call(job.store, this._getFromStack('action'), this._getFromStack('payload'))
       delete this._getFromStack('running')[job.name]
@@ -269,7 +278,7 @@ _.extend(Dispatcher.prototype, {
 // ======================================================
 // Commander
 
-function Commander(methods){
+function Commander(methods) {
   EventEmitter.call(this)
   _.extend(this, methods)
 }
@@ -277,13 +286,13 @@ function Commander(methods){
 util.inherits(Commander, EventEmitter)
 
 _.extend(Commander.prototype, {
-  send: function(action, payload){
+  send: function(action, payload) {
     this.emit('action', action, payload)
   }
 })
 
-_.each(mutFuncNames, function(funcName){
-  Commander.prototype[funcName] = function(store){
+_.each(mutFuncNames, function(funcName) {
+  Commander.prototype[funcName] = function(store) {
     var args = Array.prototype.slice.call(arguments)
     args.shift()
     this.emit('_mutate', {
@@ -296,7 +305,7 @@ _.each(mutFuncNames, function(funcName){
 // ======================================================
 // Notifier
 
-function Notifier(){
+function Notifier() {
   EventEmitter.call(this)
 }
 
@@ -309,7 +318,7 @@ _.extend(Notifier.prototype, {
 // Export
 
 _.extend(module.exports, {
-  dispatcher: function(){
+  dispatcher: function() {
     return new Dispatcher()
   }
 })
