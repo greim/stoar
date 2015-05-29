@@ -246,6 +246,19 @@ describe('loadables', function() {
     })
   })
 
+  it('should allow loadable :code', function() {
+    testStore({
+      foo: {
+        type: 'item',
+        value: 4,
+        loadable: true
+      }
+    }, function(store) {
+      store.set('foo:code', 1234)
+      assert.strictEqual(store.get('foo:code'), 1234)
+    })
+  })
+
   it('should allow loadable :timestamp', function() {
     testStore({
       foo: {

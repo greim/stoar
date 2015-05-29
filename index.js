@@ -79,6 +79,7 @@ function Store(args) {
       _.each([
         prop+':loading',
         prop+':status',
+        prop+':code',
         prop+':timestamp'
       ], function(extraProp) {
         defs[extraProp] = makeDef(extraProp, {type:def.type})

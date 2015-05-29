@@ -1,6 +1,6 @@
 {
   "name": "stoar",
-  "version": "0.1.18",
+  "version": "0.2.0",
   "description": "Flux architecture",
   "main": "index.js",
   "scripts": {
