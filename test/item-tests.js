@@ -78,7 +78,7 @@ describe('items', function() {
     it('should get loadable', function() {
       var store = disp.store({ foo:{value:1,loadable:true} })
       var loadable = store.getLoadable('foo')
-      assert.deepEqual(loadable, {value:1,status:undefined,timestamp:undefined,loading:undefined})
+      assert.deepEqual(loadable, {value:1,status:undefined,timestamp:undefined,loading:undefined,code:undefined})
     })
 
     it('should get loadable only on loadables', function() {

@@ -53,7 +53,7 @@ describe('lists', function() {
         names: {type:'list',value:['a','b'],loadable:true}
       })
       var loadable = st.getLoadable('names', 0)
-      assert.deepEqual(loadable, {value:'a',status:undefined,timestamp:undefined,loading:undefined})
+      assert.deepEqual(loadable, {value:'a',status:undefined,timestamp:undefined,loading:undefined,code:undefined})
     })
 
     it('should get loadable only on loadables', function() {
@@ -102,8 +102,8 @@ describe('lists', function() {
       })
       var loadables = st.getAllLoadables('names')
       assert.deepEqual(loadables, [
-        {value:2,loading:undefined,timestamp:undefined,status:undefined},
-        {value:3,loading:undefined,timestamp:undefined,status:undefined}
+        {value:2,loading:undefined,timestamp:undefined,status:undefined,code:undefined},
+        {value:3,loading:undefined,timestamp:undefined,status:undefined,code:undefined}
       ])
     })
 

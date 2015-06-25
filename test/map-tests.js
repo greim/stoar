@@ -61,7 +61,7 @@ describe('maps', function() {
         numbers: {type:'map',value:{foo:1,bar:2},loadable:true}
       })
       var loadable = st.getLoadable('numbers', 'foo')
-      assert.deepEqual(loadable, {value:1,status:undefined,timestamp:undefined,loading:undefined})
+      assert.deepEqual(loadable, {value:1,status:undefined,timestamp:undefined,loading:undefined,code:undefined})
     })
 
     it('should get loadable only on loadables', function() {
@@ -164,8 +164,8 @@ describe('maps', function() {
       })
       var loadables = st.getAllLoadables('names')
       assert.deepEqual(loadables, {
-        foo:{value:1,loading:undefined,timestamp:undefined,status:undefined},
-        bar:{value:2,loading:undefined,timestamp:undefined,status:undefined}
+        foo:{value:1,loading:undefined,timestamp:undefined,status:undefined,code:undefined},
+        bar:{value:2,loading:undefined,timestamp:undefined,status:undefined,code:undefined}
       })
     })
 
