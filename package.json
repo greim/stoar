@@ -1,6 +1,6 @@
 {
   "name": "stoar",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Flux architecture",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,7 @@
   "author": "gregreimer@gmail.com",
   "license": "MIT",
   "dependencies": {
-    "lodash": "^2.4.1"
+    "lodash": "^3.10.0"
   },
   "devDependencies": {
     "await": "^0.2.4"
