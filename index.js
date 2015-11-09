@@ -13,16 +13,17 @@ var _ = require('lodash')
   , itemFuncs = require('./lib/item-functions')
   , mapFuncs = require('./lib/map-functions')
   , listFuncs = require('./lib/list-functions')
-  , accFuncNames = _.keys(_.extend({}, itemFuncs.accessors, mapFuncs.accessors, listFuncs.accessors))
-  , mutFuncNames = _.keys(_.extend({}, itemFuncs.mutators, mapFuncs.mutators, listFuncs.mutators))
-  , funcsByType = {item:itemFuncs,map:mapFuncs,list:listFuncs}
+  , keyedListFuncs = require('./lib/keyed-list-functions')
+  , accFuncNames = _.keys(_.extend({}, itemFuncs.accessors, mapFuncs.accessors, listFuncs.accessors, keyedListFuncs.accessors))
+  , mutFuncNames = _.keys(_.extend({}, itemFuncs.mutators, mapFuncs.mutators, listFuncs.mutators, keyedListFuncs.mutators))
+  , funcsByType = {item:itemFuncs,map:mapFuncs,list:listFuncs,"keyed-list":keyedListFuncs}
   , isImmutable = require('./lib/is-immutable')
 
 // ======================================================
 // Store
 
 var makeDef = (function() {
-  var validTypes = {item:1,map:1,list:1}
+  var validTypes = {item:1,map:1,list:1,"keyed-list":1}
   function getDefault(type) {
     if (type === 'item') {
       return undefined
@@ -30,6 +31,8 @@ var makeDef = (function() {
       return {}
     } else if (type === 'list') {
       return []
+    } else if (type === 'keyed-list') {
+      return {}
     }
   }
   return function(prop, def) {
