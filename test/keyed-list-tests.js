@@ -34,7 +34,7 @@ describe('keyed-list', function() {
         counts:{
           type: 'keyed-list',
           value: {
-            a:[], 
+            a:[],
             b: 1
           },
           validate: function(val) {
@@ -50,6 +50,19 @@ describe('keyed-list', function() {
   describe('accessors', function() {
 
     it('should get', function() {
+      var val = ['blip']
+      var store = disp.store({
+        foo:{
+          type: 'keyed-list',
+          value: {
+            a: val
+          }
+        }
+      })
+      assert.strictEqual(store.get('foo', 'a'), val)
+    })
+
+    it('should getDeep', function() {
       var store = disp.store({
         foo:{
           type: 'keyed-list',
@@ -58,7 +71,7 @@ describe('keyed-list', function() {
           }
         }
       })
-      assert.strictEqual(store.get('foo', 'a', 0), 'blip')
+      assert.strictEqual(store.getDeep('foo', 'a', 0), 'blip')
     })
 
     it('should get loadable', function() {
@@ -367,8 +380,9 @@ describe('keyed-list', function() {
           }
         }
       }, function(store) {
-        store.set('foo', 'a', 0, 'blort')
-        assert.strictEqual(store.get('foo', 'a', 0), 'blort')
+        var val = ['blort'];
+        store.set('foo', 'a', val)
+        assert.strictEqual(store.get('foo', 'a'), val)
       })
     })
 
@@ -379,14 +393,15 @@ describe('keyed-list', function() {
           value: {a:['blink','blim']}
         }
       }, function(store) {
+        var val = ['blam'];
         store.on('change',function(prop, ch) {
           assert.strictEqual(prop, 'foo')
           assert.deepEqual(ch.oldVal, ['blink','blim'])
-          assert.deepEqual(ch.newVal, ['blink','blam'])
+          assert.deepEqual(ch.newVal, val)
           assert.strictEqual(ch.key, 'a')
           done()
         })
-        store.set('foo', 'a', 1, 'blam')
+        store.set('foo', 'a', val)
       })
     })
 
@@ -405,7 +420,59 @@ describe('keyed-list', function() {
         }
       }, function(store) {
         assert.throws(function() {
-          store.set('foo', 'a', 0, -1)
+          store.set('foo', 'a', -1)
+        }, /bad/)
+      })
+    })
+
+    it('should setDeep', function() {
+      testStore({
+        foo:{
+          type: 'keyed-list',
+          value: {
+            a:['blam','blat']
+          }
+        }
+      }, function(store) {
+        store.setDeep('foo', 'a', 0, 'blort')
+        assert.strictEqual(store.getDeep('foo', 'a', 0), 'blort')
+      })
+    })
+
+    it('should change on setDeep', function(done) {
+      testStore({
+        foo:{
+          type: 'keyed-list',
+          value: {a:['blink','blim']}
+        }
+      }, function(store) {
+        store.on('change',function(prop, ch) {
+          assert.strictEqual(prop, 'foo')
+          assert.deepEqual(ch.oldVal, ['blink','blim'])
+          assert.deepEqual(ch.newVal, ['blink','blam'])
+          assert.strictEqual(ch.key, 'a')
+          done()
+        })
+        store.setDeep('foo', 'a', 1, 'blam')
+      })
+    })
+
+    it('should validate setDeep', function() {
+      testStore({
+        foo:{
+          type: 'keyed-list',
+          value: {
+            a:[1,2]
+          },
+          validate: function(val) {
+            if (val < 0) {
+              throw 'bad'
+            }
+          }
+        }
+      }, function(store) {
+        assert.throws(function() {
+          store.setDeep('foo', 'a', 0, -1)
         }, /bad/)
       })
     })
@@ -579,8 +646,8 @@ describe('keyed-list', function() {
         }
       }, function(store) {
         store.resetAll('foo', null)
-        store.set('foo','x', 1, 3)
-        assert.strictEqual(store.get('foo','x', 1), 3)
+        store.setDeep('foo','x', 1, 3)
+        assert.strictEqual(store.getDeep('foo','x', 1), 3)
       })
     })
 
